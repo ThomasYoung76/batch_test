@@ -91,6 +91,7 @@ def wait_process(name, sleep=1):
     while check_process(name):
         time.sleep(sleep)
 
+
 def check_directory(name):
     if Path(name).exists():
         print("{0} Exists，Now Delete it!".format(name))
@@ -100,8 +101,25 @@ def check_directory(name):
         except Exception as info:
             print('Error: shutil.rmtree {}'.format(name))
             print(info)
+            import traceback
             traceback.print_exc()
             print('Please close file and directories and continue...')
 
     print("mkdir {0} .".format(name))
     Path(name).mkdir(parents=True, exist_ok=True)
+
+
+def wait_crontab(plan_time):
+    """
+    一直等到设定的时间，才退出等待
+    :param plan_time: 预定的时间，格式：%H:%M(如08：00）
+    :return:
+    """
+    crontab = True
+    while crontab:
+        if plan_time:
+            execute_time = str_to_time(plan_time)
+            while datetime.datetime.now() < execute_time:
+                time.sleep(1)
+        else:
+            crontab = False

@@ -11,7 +11,7 @@ data_set = {
         'file_type': 'jpg',
         'process': 'sample_liveness',
         'flag':'photo/',
-        'cmd': "nohup ./run -l output/files.txt > live.log 2>&1 & ",
+        'cmd': "nohup ./run -l output/files.txt > liveness.log 2>&1 & ",
         },
     "detect": {
         'file_type': 'jpg',

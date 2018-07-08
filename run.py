@@ -21,21 +21,38 @@ from common import *
 def init_args():
     desc = """ pc端批处理 """
     parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('test_type', action="store", help=u'测试类型')
-    parser.add_argument('data_path', action='store', help='数据集目录或者数据集的绝对路径')
-    parser.add_argument('-w', action="store_true", default=False, help=u'是否等待结束')
+    parser.add_argument('-p', '--test_type', action="store", default='liveness', help=u'测试类型')
+    parser.add_argument('-d', '--data_path', action='store', help='数据集目录或者数据集的绝对路径')
+    parser.add_argument('-w', action="store_true", dest='wait', default=False, help=u'是否等待结束')
     parser.add_argument('-e', action='store', dest='ext', default='', help='文件扩展名，默认为ir')
     parser.add_argument('-t', action='store', dest='time', default=None, help='执行时间')
+    parser.add_argument('-f', action='store', dest='file', help='带执行的文件')
     args = parser.parse_args()
 
-    test_type, data_path, is_wait, file_ext, crontab_time = \
-        args.test_type, args.data_path, args.w, args.ext, args.time
+    global test_type, data_path, is_wait, file_ext, crontab_time, execute_file
+
+    test_type, data_path, is_wait, file_ext, crontab_time, execute_file = \
+        args.test_type, args.data_path, args.wait, args.ext, args.time, args.file
+
+    if execute_file is not None:
+        try:
+            assert Path(execute_file).is_file()
+        except AssertionError:
+            sys.exit("Error. Parameter: {} is not a file".format(execute_file))
+        try:
+            json.load(execute_file)
+        except:
+            sys.exit("Error. Parameter: {} is not a json file".format(execute_file))
+        return None
 
     # 参数检查
     try:
         assert test_type in ['liveness', 'detect', 'verify']
     except AssertionError:
         sys.exit("Error. Parameter: {} not in ['liveness', 'detect', 'verify']".format(test_type))
+
+    if data_path is None:
+        sys.exit("Error. Parameter: data_path cannot be None")
 
     if not data_path.startswith('/'):
         if args.ext in ['jpg', 'yuv']:
@@ -47,13 +64,17 @@ def init_args():
         # print()
         sys.exit("Error. Parameter: {} not exists. ".format(data_path))
 
-    if args.time is not None:
+    if crontab_time is not None:
         try:
-            datetime.datetime.strptime(args.time, "%H:%M")
+            datetime.datetime.strptime(crontab_time, "%H:%M")
+            wait_crontab(crontab_time)
         except:
-            sys.exit("Error. Parameter: {} is not time data, cannot match format '%H:%M".format(args.time))
+            sys.exit("Error. Parameter: {} is not time data, cannot match format '%H:%M".format(crontab_time))
 
-    global test_type, data_path, is_wait, file_ext, crontab_time
+
+def get_param(file_path):
+
+    pass    # 当参数传文件时，改变global里的值
 
 
 def get_config():
@@ -66,8 +87,9 @@ def get_config():
     search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
     if not search:
         sys.exit("Error: Can not find version!")
-    version = search.group(1)
     global version
+    version = search.group(1)
+
     print('{} {}'.format(test_type, version))
     return configs
 
@@ -102,22 +124,22 @@ def remove_result(result_type):
 
     if Path(result).exists():
         os.remove(result)
-
     return result
 
 
 def execute():
     start = datetime.datetime.now()
-    now = datetime.datetime.strftime(start, '%Y%m%d_%H%M%S')
     global now
+    now = datetime.datetime.strftime(start, '%Y%m%d_%H%M%S')
     cmd = 'cd {} && {}'.format(PATH_BASE, data_set[test_type]['cmd'])
     ret = subprocess.call(cmd, shell=True)
     if ret != 0:
-        sys.exit("Error. command {0} execute failed, see log in {1}".format(data_set[test_type]['cmd'], PATH_BASE))
+        sys.exit("Error. command {} execute failed, see {}.log in {}".format(data_set[test_type]['cmd'], test_type, PATH_BASE))
     else:
         end = datetime.datetime.now()
         gap = (end - start).total_seconds()
         print("Success. elapse time: {}s".format(gap))
+
 
 def optimize_result(result):
     result_directory = "{0}{1}result{1}{2}-{3}-{4}".format(PATH_BASE, os.sep, test_type, now, version)
@@ -141,9 +163,9 @@ def main():
     if not Path(raw_result):
         wait_process('sample')
 
+
 if __name__ == "__main__":
     main()
-
 
 
 
