@@ -133,7 +133,6 @@ def get_result_name():
 
     if Path(result).exists():
         os.remove(result)
-        time.sleep(1)
     return result
 
 
@@ -165,6 +164,7 @@ def execute():
         sys.exit("Error. command {} execute failed, see {}.log in {}".format(data_set[test_type]['cmd'], test_type, PATH_BASE))
     else:
         pass
+    time.sleep(3)   # 等进程起来
     # wait for result
     if not is_wait:
         exit(0)
@@ -175,7 +175,10 @@ def optimize_result(raw_result, file_name, label_name):
     check_directory(result_dir)
     print("See result in {}".format(result_dir))
     new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
-    shutil.copyfile(raw_result, new_result)
+    try:
+        shutil.copyfile(raw_result, new_result)
+    except FileNotFoundError as e:
+        sys.exit(e)
     shutil.copy2(file_name, result_dir)
     shutil.copy2(label_name, result_dir)
     shutil.copy2(PATH_CONFIG, result_dir)
