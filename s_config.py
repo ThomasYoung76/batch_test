@@ -12,7 +12,7 @@ fprs=[(0.1 - 0.01*p) for p in np.arange(0,10)]
 
 data_set = {
     "liveness": {
-        'file_type': 'jpg',
+        'file_type': 'yuv',
         'process': 'sample_liveness',
         'flag': 'photo/',
         'cmd': "nohup ./run -l output/files.txt > liveness.log 2>&1 & ",

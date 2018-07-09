@@ -138,9 +138,8 @@ def get_result_name():
 
 def prepare_data():
     # 暂时只支持liveness
-    label_name = "{}{}{}".format(PATH_BASE, os.sep, "output/files.txt")
-    file_name = "{}{}{}".format(PATH_BASE, os.sep, "output/labels.txt")
-    config_name = "{}{}{}".format(PATH_BASE, os.sep, "config.json")
+    file_name = "{}{}{}".format(PATH_BASE, os.sep, "output/files.txt")
+    label_name = "{}{}{}".format(PATH_BASE, os.sep, "output/labels.txt")
     if file_ext:
         data_set[test_type]['file_type'] = file_ext
     ext = data_set[test_type]['file_type']
@@ -151,7 +150,7 @@ def prepare_data():
         sys.exit("目前只支持跑活体，其他批处理方式后续支持")
     list2file(files, file_name)
     list2file(labels, label_name)
-    return file_name, label_name, config_name
+    return file_name, label_name
 
 
 def execute():
@@ -202,7 +201,7 @@ def main():
     configs = get_config()
     check_config()
     raw_result = get_result_name()
-    file_path, label_path, config_path = prepare_data()
+    file_path, label_path = prepare_data()
     execute()
     if not is_wait:
         exit(0)
