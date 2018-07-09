@@ -105,7 +105,7 @@ def get_config():
 
 def check_config():
     # 检查配置文件，确认模型都存在
-    d = json.load(open(PATH_CONFIG, encoding='utf-8'))
+    d = json.load(open(PATH_CONFIG))
     for item in d['model']:
         model = d['model'][item]
         if not Path(os.path.join(PATH_BASE, model)).exists():
@@ -171,8 +171,7 @@ def execute():
         exit(0)
 
 
-def optimize_result(file_name, label_name):
-    raw_result = get_result_name()
+def optimize_result(raw_result, file_name, label_name):
     result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
     check_directory(result_dir)
     new_result = '{}{}{}_{}{}'.format(result_dir, os.sep, Path(raw_result).stem, data_version, Path(raw_result).suffix)
@@ -210,7 +209,7 @@ def main():
     if not Path(raw_result):
         wait_process('sample')
 
-    optimize_result(file_path, label_path)
+    optimize_result(raw_result, file_path, label_path)
 
 
 if __name__ == "__main__":
