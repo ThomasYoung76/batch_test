@@ -78,8 +78,6 @@ def check_directory(name):
             import traceback
             traceback.print_exc()
             print('Please close file and directories and continue...')
-
-    print("mkdir {0} .".format(name))
     Path(name).mkdir(parents=True, exist_ok=True)
 
 

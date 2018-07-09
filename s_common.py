@@ -31,7 +31,7 @@ def check_process(name):
 
 
 def wait_process(name, sleep=1):
-    print("Waiting " + name)
+    print("Waiting {} ...".format(name))
     while check_process(name):
         time.sleep(sleep)
 

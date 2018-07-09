@@ -133,6 +133,7 @@ def get_result_name():
 
     if Path(result).exists():
         os.remove(result)
+        time.sleep(1)
     return result
 
 
@@ -172,6 +173,7 @@ def execute():
 def optimize_result(raw_result, file_name, label_name):
     result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
     check_directory(result_dir)
+    print("See result in {}".format(result_dir))
     new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
     shutil.copyfile(raw_result, new_result)
     shutil.copy2(file_name, result_dir)
