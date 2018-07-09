@@ -105,7 +105,7 @@ def get_config():
 
 def check_config():
     # 检查配置文件，确认模型都存在
-    d = json.load(PATH_CONFIG)
+    d = json.load(open(PATH_CONFIG, encoding='utf-8'))
     for item in d['model']:
         model = d['model'][item]
         if not Path(os.path.join(PATH_BASE, model)).exists():
@@ -166,6 +166,9 @@ def execute():
         end = datetime.datetime.now()
         gap = (end - start).total_seconds()
         print("Success. elapse time: {}s".format(gap))
+    # wait for result
+    if not is_wait:
+        exit(0)
 
 
 def optimize_result(file_name, label_name):
