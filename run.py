@@ -75,7 +75,6 @@ def check_args():
     if crontab_time is not None:
         try:
             datetime.datetime.strptime(crontab_time, "%H:%M")
-            wait_crontab(crontab_time)
         except:
             sys.exit("Error. Parameter: {} is not time data, cannot match format '%H:%M".format(crontab_time))
 
@@ -206,6 +205,7 @@ def main():
     check_config()
     raw_result = get_result_name()
     file_path, label_path = prepare_data()
+    wait_crontab(crontab_time)
     execute()
     if not Path(raw_result).exists():
         wait_process('sample')

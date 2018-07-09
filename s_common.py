@@ -39,14 +39,11 @@ def wait_process(name, sleep=1):
 def wait_crontab(plan_time):
     """
     一直等到设定的时间，才退出等待
-    :param plan_time: 预定的时间，格式：%H:%M(如08：00）
+    :param plan_time: 字符串，预定的时间，格式：%H:%M(如08：00）
     :return:
     """
-    crontab = True
-    while crontab:
-        if plan_time:
-            execute_time = str_to_time(plan_time)
-            while datetime.datetime.now() < execute_time:
-                time.sleep(1)
-        else:
-            crontab = False
+    if plan_time:
+        print("test will execute at {}, please waiting ...".format(plan_time))
+        execute_time = str_to_time(plan_time)
+        while datetime.datetime.now() < execute_time:
+            time.sleep(1)
