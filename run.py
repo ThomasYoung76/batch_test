@@ -194,7 +194,7 @@ def analysis_result(result):
 
 def main():
     init_args()
-    check_config()
+    check_args()
     set_config()
     configs = get_config()
     check_config()
