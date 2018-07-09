@@ -158,6 +158,7 @@ def execute():
     global now
     now = datetime.datetime.strftime(start, '%Y%m%d_%H%M%S')
     cmd = 'cd {} && {}'.format(PATH_BASE, data_set[test_type]['cmd'])
+    print(cmd)
     ret = subprocess.call(cmd, shell=True)
     if ret != 0:
         sys.exit("Error. command {} execute failed, see {}.log in {}".format(data_set[test_type]['cmd'], test_type, PATH_BASE))
@@ -205,7 +206,7 @@ def main():
     execute()
     if not is_wait:
         exit(0)
-    if not Path(raw_result):
+    if not Path(raw_result).exists():
         wait_process('sample')
 
     optimize_result(raw_result, file_path, label_path)
