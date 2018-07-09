@@ -204,7 +204,7 @@ def main():
     if not Path(raw_result):
         wait_process('sample')
 
-    optimize_result(file_path)
+    optimize_result(file_path, label_path, config_path)
 
 
 if __name__ == "__main__":
