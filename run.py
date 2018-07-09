@@ -167,7 +167,7 @@ def execute():
         print("Success. elapse time: {}s".format(gap))
 
 
-def optimize_result(file_name, label_name, *args):
+def optimize_result(file_name, label_name):
     raw_result = get_result_name()
     result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
     check_directory(result_dir)
@@ -175,8 +175,7 @@ def optimize_result(file_name, label_name, *args):
     shutil.copyfile(raw_result, new_result)
     shutil.copy2(file_name, result_dir)
     shutil.copy2(label_name, result_dir)
-    for f in args:
-        shutil.copy2(f, result_dir)
+    shutil.copy2(PATH_CONFIG, result_dir)
 
     # 写结果
     final_result = "{0}{1}{2}_result.xls".format(result_dir, os.sep, version)
@@ -195,9 +194,10 @@ def analysis_result(result):
 
 def main():
     init_args()
+    check_config()
     set_config()
     configs = get_config()
-    check_config(configs)
+    check_config()
     raw_result = get_result_name()
     file_path, label_path, config_path = prepare_data()
     execute()
@@ -206,7 +206,7 @@ def main():
     if not Path(raw_result):
         wait_process('sample')
 
-    optimize_result(file_path, label_path, config_path)
+    optimize_result(file_path, label_path)
 
 
 if __name__ == "__main__":
