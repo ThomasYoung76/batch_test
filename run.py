@@ -12,10 +12,13 @@ import shutil
 import json
 import subprocess
 
+
 from pathlib import Path
 
-from config import *
-from common import *
+from s_config import *
+from s_common import *
+from s_file import *
+import s_roc
 
 
 def init_args():
@@ -30,10 +33,11 @@ def init_args():
     args = parser.parse_args()
 
     global test_type, data_path, is_wait, file_ext, crontab_time, execute_file
-
     test_type, data_path, is_wait, file_ext, crontab_time, execute_file = \
         args.test_type, args.data_path, args.wait, args.ext, args.time, args.file
 
+
+def check_args():
     if execute_file is not None:
         try:
             assert Path(execute_file).is_file()
@@ -55,10 +59,10 @@ def init_args():
         sys.exit("Error. Parameter: data_path cannot be None")
 
     if not data_path.startswith('/'):
-        if args.ext in ['jpg', 'yuv']:
+        if file_ext in ['jpg', 'yuv']:
             data_path = os.path.join(PATH_DATA_2D, [test_type, args.directory])
         else:
-            data_path = args.directory    # 3d数据集查找方法待定
+            data_path = file_ext.directory    # 3d数据集查找方法待定
 
     if not Path(data_path).exists():
         # print()
@@ -73,23 +77,26 @@ def init_args():
 
 
 def get_param(file_path):
+    pass    # 从json文件中获取参数
 
-    pass    # 当参数传文件时，改变global里的值
 
-
-def get_config():
+def set_config():
+    global data_version
     data_version = Path(data_path).name
     raw_config = Path(data_path).parent / "config" / (data_version + ".json")
     config_name = os.path.join(PATH_BASE, 'config.json')
     if raw_config.is_file():
         shutil.copy2(raw_config, config_name)
+
+
+def get_config():
+    config_name = os.path.join(PATH_BASE, 'config.json')
     configs = open(config_name).read()
     search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
     if not search:
         sys.exit("Error: Can not find version!")
     global version
     version = search.group(1)
-
     print('{} {}'.format(test_type, version))
     return configs
 
@@ -110,21 +117,39 @@ def check_data_set():
     pass
 
 
-def remove_result(result_type):
-    if result_type == 'detect':
+def get_result_name():
+    if test_type == 'detect':
         result = "{0}{1}{2}{1}{2}_output%files.txt.txt".format(
-            PATH_BASE, os.sep, result_type)
+            PATH_BASE, os.sep, test_type)
     else:
         result = "{0}{1}{2}{1}{2}_output%files.txt.csv".format(
-            PATH_BASE, os.sep, result_type)
+            PATH_BASE, os.sep, test_type)
 
-    if result_type == 'verify':
+    if test_type == 'verify':
         result = "{0}{1}{2}{1}{2}_score_output%i_enroll.txt.csv".format(
-            PATH_BASE, os.sep, result_type)
+            PATH_BASE, os.sep, test_type)
 
     if Path(result).exists():
         os.remove(result)
     return result
+
+
+def prepare_data():
+    # 暂时只支持liveness
+    label_name = "{}{}{}".format(PATH_BASE, os.sep, "output/files.txt")
+    file_name = "{}{}{}".format(PATH_BASE, os.sep, "output/labels.txt")
+    config_name = "{}{}{}".format(PATH_BASE, os.sep, "config.json")
+    if file_ext:
+        data_set[test_type]['file_type'] = file_ext
+    ext = data_set[test_type]['file_type']
+    if test_type == 'liveness':
+        files = get_files(data_path, file_type=ext, is_abs=True)
+        labels = get_labels_for_pc(files, flag=data_set[test_type]['flag'])
+    else:
+        sys.exit("目前只支持跑活体，其他批处理方式后续支持")
+    list2file(files, file_name)
+    list2file(labels, label_name)
+    return file_name, label_name, config_name
 
 
 def execute():
@@ -141,52 +166,51 @@ def execute():
         print("Success. elapse time: {}s".format(gap))
 
 
-def optimize_result(result):
-    result_directory = "{0}{1}result{1}{2}-{3}-{4}".format(PATH_BASE, os.sep, test_type, now, version)
-    check_directory(result_directory)
-    new_result = "{0}{1}{2}-result.csv".format(result_directory, os.sep, version)
-    print(result)
-    print(new_result)
-    time.sleep(1)
-    shutil.copyfile(result, new_result)
-    error_name = "{0}{1}{2}----result.xlsx".format(result_directory, os.sep, version)
+def optimize_result(file_name, label_name, *args):
+    raw_result = get_result_name()
+    result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
+    check_directory(result_dir)
+    new_result = '{}{}{}_{}{}'.format(result_dir, os.sep, Path(raw_result).stem, data_version, Path(raw_result).suffix)
+    shutil.copyfile(raw_result, new_result)
+    shutil.copy2(file_name, result_dir)
+    shutil.copy2(label_name, result_dir)
+    for f in args:
+        shutil.copy2(f, result_dir)
+
+    # 写结果
+    final_result = "{0}{1}{2}_result.xls".format(result_dir, os.sep, version)
+    df1, df2, df3, df4 = get_liveness_server_result(
+        new_result, file_name, label_name,
+        replace='', error_name=final_result)
+
+    # 写roc
+    roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
+    s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
+
+
+def analysis_result(result):
+    pass  # 执行完成后分析结果
 
 
 def main():
     init_args()
     configs = get_config()
     check_config(configs)
-    raw_result = remove_result(test_type)
+    raw_result = get_result_name()
+    file_path, label_path, config_path = prepare_data()
     execute()
     if not is_wait:
         exit(0)
     if not Path(raw_result):
         wait_process('sample')
 
+    optimize_result(file_path)
+
 
 if __name__ == "__main__":
     main()
 
 
-
-# if options.directory is None:
-#     if not options.data_type:
-#         print("data_type不能为空")
-#         exit(1)
-#     options.directory = data_set[options.test_type][options.data_type]
-
 # file_name = "{}{}{}".format(tool, os.sep, "output/files.txt")
 # label_name = "{}{}{}".format(tool, os.sep, "output/labels.txt")
 # config_name = "{}{}{}".format(tool, os.sep, "config.json")
-#
-# data_version = Path(options.directory).name
-# raw_config = Path(options.directory).parent / "config" / (data_version + ".json")
-# if raw_config.is_file():
-#     shutil.copy2(raw_config, config_name)
-#
-# # 检查配置文件，确认模型都存在
-# d = json.load(open(config_name))
-# print('\n{}\n'.format(config_name))
-# print('#' * 80)
-# print('\n')
-# pprint.pprint(d)
