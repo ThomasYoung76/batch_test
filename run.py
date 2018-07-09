@@ -61,11 +61,12 @@ def check_args():
     if data_path is None:
         sys.exit("Error. Parameter: data_path cannot be None")
 
-    if not data_path.startswith('/'):
-        if file_ext in ['jpg', 'yuv']:
-            data_path = os.path.join(PATH_DATA_2D, [test_type, args.directory])
-        else:
-            data_path = file_ext.directory    # 3d数据集查找方法待定
+    # # 处理data_path
+    # if not data_path.startswith('/'):
+    #     if file_ext in ['jpg', 'yuv']:
+    #         data_path = os.path.join(PATH_DATA_2D, [test_type, data_path])
+    #     else:
+    #         data_path = file_ext.directory    # 3d数据集查找方法待定
 
     if not Path(data_path).exists():
         # print()
