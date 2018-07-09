@@ -61,7 +61,7 @@ def check_args():
     if data_path is None:
         sys.exit("Error. Parameter: data_path cannot be None")
 
-    # # 处理data_path
+    # # 提供简洁的输入data_path的方法
     # if not data_path.startswith('/'):
     #     if file_ext in ['jpg', 'yuv']:
     #         data_path = os.path.join(PATH_DATA_2D, [test_type, data_path])
@@ -163,9 +163,7 @@ def execute():
     if ret != 0:
         sys.exit("Error. command {} execute failed, see {}.log in {}".format(data_set[test_type]['cmd'], test_type, PATH_BASE))
     else:
-        end = datetime.datetime.now()
-        gap = (end - start).total_seconds()
-        print("Success. elapse time: {}s".format(gap))
+        pass
     # wait for result
     if not is_wait:
         exit(0)
@@ -174,7 +172,7 @@ def execute():
 def optimize_result(raw_result, file_name, label_name):
     result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
     check_directory(result_dir)
-    new_result = '{}{}{}_{}{}'.format(result_dir, os.sep, Path(raw_result).stem, data_version, Path(raw_result).suffix)
+    new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
     shutil.copyfile(raw_result, new_result)
     shutil.copy2(file_name, result_dir)
     shutil.copy2(label_name, result_dir)
@@ -204,18 +202,15 @@ def main():
     raw_result = get_result_name()
     file_path, label_path = prepare_data()
     execute()
-    if not is_wait:
-        exit(0)
     if not Path(raw_result).exists():
         wait_process('sample')
+
+    end = datetime.datetime.now()
+    gap = (end - datetime.datetime.strptime(now, '%Y%m%d_%H%M%S')).total_seconds()
+    print("Success. elapse time: {}s".format(gap))
 
     optimize_result(raw_result, file_path, label_path)
 
 
 if __name__ == "__main__":
     main()
-
-
-# file_name = "{}{}{}".format(tool, os.sep, "output/files.txt")
-# label_name = "{}{}{}".format(tool, os.sep, "output/labels.txt")
-# config_name = "{}{}{}".format(tool, os.sep, "config.json")
