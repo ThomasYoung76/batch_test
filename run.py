@@ -199,6 +199,10 @@ def analysis_result(result):
 
 
 def main():
+    # 检查环境
+    if check_process('sample'):
+        sys.exit("Exit. someone is testing. "
+                 "please ensure environment is okay first and then try again.")
     init_args()
     check_args()
     set_config()
