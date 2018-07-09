@@ -7,6 +7,7 @@ PATH_DATA = '/mnt/lustre/yangshifu/testset'       # 数据集根路径
 PATH_DATA_2D = os.path.join(PATH_DATA, '2d')    # 深圳2d数据集路径
 PATH_DATA_3D = os.path.join(PATH_DATA, '3d')    # 深圳3d数据集路径
 
+
 # 写roc的fprs
 fprs=[(0.1 - 0.01*p) for p in np.arange(0,10)]
 

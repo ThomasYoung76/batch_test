@@ -21,6 +21,9 @@ from s_file import *
 import s_roc
 
 
+PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
+
+
 def init_args():
     desc = """ pc端批处理 """
     parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawTextHelpFormatter)
@@ -32,21 +35,21 @@ def init_args():
     parser.add_argument('-f', action='store', dest='file', help='带执行的文件')
     args = parser.parse_args()
 
-    global test_type, data_path, is_wait, file_ext, crontab_time, execute_file
-    test_type, data_path, is_wait, file_ext, crontab_time, execute_file = \
+    global test_type, data_path, is_wait, file_ext, crontab_time, exe_file
+    test_type, data_path, is_wait, file_ext, crontab_time, exe_file = \
         args.test_type, args.data_path, args.wait, args.ext, args.time, args.file
 
 
 def check_args():
-    if execute_file is not None:
+    if exe_file is not None:
         try:
-            assert Path(execute_file).is_file()
+            assert Path(exe_file).is_file()
         except AssertionError:
-            sys.exit("Error. Parameter: {} is not a file".format(execute_file))
+            sys.exit("Error. Parameter: {} is not a file".format(exe_file))
         try:
-            json.load(execute_file)
+            json.load(exe_file)
         except:
-            sys.exit("Error. Parameter: {} is not a json file".format(execute_file))
+            sys.exit("Error. Parameter: {} is not a json file".format(exe_file))
         return None
 
     # 参数检查
@@ -84,14 +87,12 @@ def set_config():
     global data_version
     data_version = Path(data_path).name
     raw_config = Path(data_path).parent / "config" / (data_version + ".json")
-    config_name = os.path.join(PATH_BASE, 'config.json')
     if raw_config.is_file():
-        shutil.copy2(raw_config, config_name)
+        shutil.copy2(raw_config, PATH_CONFIG)
 
 
 def get_config():
-    config_name = os.path.join(PATH_BASE, 'config.json')
-    configs = open(config_name).read()
+    configs = open(PATH_CONFIG).read()
     search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
     if not search:
         sys.exit("Error: Can not find version!")
@@ -101,9 +102,9 @@ def get_config():
     return configs
 
 
-def check_config(config):
+def check_config():
     # 检查配置文件，确认模型都存在
-    d = json.load(config)
+    d = json.load(PATH_CONFIG)
     for item in d['model']:
         model = d['model'][item]
         if not Path(os.path.join(PATH_BASE, model)).exists():
@@ -194,6 +195,7 @@ def analysis_result(result):
 
 def main():
     init_args()
+    set_config()
     configs = get_config()
     check_config(configs)
     raw_result = get_result_name()
