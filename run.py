@@ -25,20 +25,29 @@ import s_roc
 PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
 
 
+def init_env():
+    # 环境忙时等待空闲或者直接退出
+    while check_process('sample'):
+        if not is_wait_env_free:
+            sys.exit("Exit. someone is testing. "
+                     "please ensure environment is okay first and then try again.")
+        else:
+            time.sleep(60)
+
+
 def init_args():
     desc = """ pc端批处理 """
     parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-p', '--test_type', action="store", default='liveness', help=u'测试类型')
     parser.add_argument('-d', '--data_path', action='store', help='数据集目录或者数据集的绝对路径')
-    parser.add_argument('-w', action="store_true", dest='wait', default=False, help=u'是否等待结束')
     parser.add_argument('-e', action='store', dest='ext', default='', help='文件扩展名，默认为ir')
     parser.add_argument('-t', action='store', dest='time', default=None, help='执行时间')
     parser.add_argument('-f', action='store', dest='file', help='带执行的文件')
     args = parser.parse_args()
 
-    global test_type, data_path, is_wait, file_ext, crontab_time, exe_file
-    test_type, data_path, is_wait, file_ext, crontab_time, exe_file = \
-        args.test_type, args.data_path, args.wait, args.ext, args.time, args.file
+    global test_type, data_path, file_ext, crontab_time, exe_file
+    test_type, data_path, file_ext, crontab_time, exe_file = \
+        args.test_type, args.data_path, args.ext, args.time, args.file
 
 
 def check_args():
@@ -93,7 +102,11 @@ def set_config():
 
 
 def get_config():
-    configs = open(PATH_CONFIG).read()
+    try:
+        with open(PATH_CONFIG) as f:
+            configs = f.read()
+    except FileNotFoundError as e:
+        sys.exit(e)
     search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
     if not search:
         sys.exit("Error: Can not find version!")
@@ -161,13 +174,15 @@ def execute():
     print(cmd)
     ret = subprocess.call(cmd, shell=True)
     if ret != 0:
-        sys.exit("Error. command {} execute failed, see {}.log in {}".format(data_set[test_type]['cmd'], test_type, PATH_BASE))
+        sys.exit("Error. command {} execute failed, see {}.log in {}".format(
+            data_set[test_type]['cmd'], test_type, PATH_BASE))
     else:
         pass
     time.sleep(3)   # 等进程起来
     # wait for result
-    if not is_wait:
-        exit(0)
+    if not is_wait_finish:
+        sys.exit('wait test finish. then see result in {}'.format(
+            os.path.join(PATH_CONFIG, test_type)))
 
 
 def optimize_result(raw_result, file_name, label_name):
@@ -199,10 +214,7 @@ def analysis_result(result):
 
 
 def main():
-    # 检查环境
-    if check_process('sample'):
-        sys.exit("Exit. someone is testing. "
-                 "please ensure environment is okay first and then try again.")
+    init_env()
     init_args()
     check_args()
     set_config()
