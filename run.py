@@ -20,6 +20,7 @@ from s_config import *
 from s_common import *
 from s_file import *
 import s_roc
+import s_json
 
 
 PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
@@ -89,8 +90,9 @@ def check_args():
             sys.exit("Error. Parameter: {} is not time data, cannot match format '%H:%M".format(crontab_time))
 
 
-def get_param(file_path):
-    pass    # 从json文件中获取参数
+def get_param():
+    all_id, params, configs = s_json.get_params()
+    pass
 
 
 def set_config():
@@ -216,10 +218,14 @@ def analysis_result(result):
 def main():
     init_env()
     init_args()
+    # # 处理文件中的参数
+    # all_id, params, configs = s_json.get_params()
+    #
     check_args()
     set_config()
     configs = get_config()
     check_config()
+    check_data_set()
     raw_result = get_result_name()
     file_path, label_path = prepare_data()
     wait_crontab(crontab_time)
