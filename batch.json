@@ -1,11 +1,11 @@
 {
 	"liveness":
 	[{
-			"id": 6,
+			"id": 0,
 			"test_type": "liveness",
-			"data_path": "",
-			"ext": "jpg",
-			"time": "10:00",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.41",
+			"ext": "yuv",
+			"time": "",
 			"model": {
 				"align": "models/align/M_Align_occlusion_106_1.6.4.model",
 				"detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_360_4.7.4.model",
@@ -21,9 +21,9 @@
 		}, {
 			"id": 1,
 			"test_type": "liveness",
-			"data_path": "",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.42",
 			"ext": "jpg",
-			"time": "10:00",
+			"time": "",
 			"model": {
 				"align": "models/align/M_Align_occlusion_106_1.6.4.model",
 				"detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_360_4.7.4.model",
@@ -34,7 +34,7 @@
 	],
 	"verify":
 	[{
-			"id": 2,
+			"id": -1,
 			"test_type": "verify",
 			"data_path": "",
 			"ext": "jpg",
@@ -46,7 +46,7 @@
 				"liveness": "models/liveness/"
 			}
 		}, {
-			"id": 3,
+			"id": -1,
 			"test_type": "verify",
 			"data_path": "",
 			"ext": "jpg",

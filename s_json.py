@@ -1,4 +1,10 @@
-import re
+#!/usr/bin/env python3
+"""
+Created on 2018/7/10
+
+@author: yangshifu
+@mail: yangshifu@sensetime.com
+"""
 import json
 
 val_json = json.load(open('batch.json'))
@@ -13,8 +19,9 @@ def get_params():
     for type_ in val_json:
         t_type = val_json[type_]
         for i in range(len(t_type)):
-
             dict_all = t_type[i]
+            if int(dict_all['id']) == -1:
+                continue
             id_ = dict_all['id']
             dict_params = dict([(k, dict_all.get(k)) for k in params])
             dict_config = dict([(k, dict_all.get(k)) for k in config])

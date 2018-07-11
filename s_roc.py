@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 """
 Created on 2018/7/9
 
@@ -7,11 +7,11 @@ Created on 2018/7/9
 """
 import sys
 import numpy as np
-# import argparse
 from sklearn.metrics import roc_curve
 
 from s_config import fprs
 from s_file import list2file
+
 
 def cal_roc(score_name, label_name, roc_name, fprs=fprs):
     roc_list = []
@@ -39,3 +39,14 @@ def cal_roc(score_name, label_name, roc_name, fprs=fprs):
     roc_list.append("tpr(%) | "+" | ".join('{:.2f}'.format(i*100) for i in tpr_k_score))
     roc_list.append("thres  | "+" | ".join('{:.3f}'.format(i) for i in th_k_score))
     list2file(roc_list, roc_name)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--score', default='', type=str, help='生成的分数矩阵')
+    parser.add_argument('-l', '--label', default='', type=str, help='label文件')
+    parser.add_argument('-o', '--output', default='roc.txt', type=str, help='输出的roc文本')
+    args = parser.parse_args()
+    cal_roc(args.score, args.label, args.output)

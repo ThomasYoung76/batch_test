@@ -83,7 +83,7 @@ def check_args():
         # print()
         sys.exit("Error. Parameter: {} not exists. ".format(data_path))
 
-    if crontab_time is not None:
+    if crontab_time:
         try:
             datetime.datetime.strptime(crontab_time, "%H:%M")
         except:
@@ -216,11 +216,6 @@ def analysis_result(result):
 
 
 def main():
-    init_env()
-    init_args()
-    # # 处理文件中的参数
-    # all_id, params, configs = s_json.get_params()
-    #
     check_args()
     set_config()
     configs = get_config()
@@ -241,4 +236,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    init_env()
+    init_args()
+    if not exe_file:
+        main()
+    else:
+        # # 处理文件中的参数
+        all_id, params, configs = s_json.get_params()
+        for i in range(len(all_id)):
+            d_param = params[i]
+            test_type, data_path, file_ext, crontab_time = \
+                d_param['test_type'], d_param['data_path'], d_param['ext'], d_param['ext']
+            main()
