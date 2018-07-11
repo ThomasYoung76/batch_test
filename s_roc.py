@@ -24,7 +24,6 @@ def cal_roc(score_name, label_name, roc_name, fprs=fprs):
                  " same rows required. ".format(score_name, len(scores), label_name, len(labels)))
     roc_fpr, roc_tpr, roc_thresholds = roc_curve(labels, scores, pos_label=1, drop_intermediate=False)
 
-    fprs = [10**(-p) for p in np.arange(1, 7, 1.)]
     tpr_k_score = []
     th_k_score = []
     for fpr_ratio in fprs:

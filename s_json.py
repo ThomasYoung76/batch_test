@@ -9,7 +9,7 @@ import json
 
 
 def get_params(json_file):
-    val_json = json.load(json_file)
+    val_json = json.load(open(json_file))
     list_params = []
     list_config = []
     params = ['id', 'test_type', 'data_path', 'ext', 'time']

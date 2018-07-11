@@ -58,7 +58,7 @@ def check_args():
         except AssertionError:
             sys.exit("Error. Parameter: {} is not a file".format(exe_file))
         try:
-            json.load(exe_file)
+            json.load(open(exe_file))
         except:
             sys.exit("Error. Parameter: {} is not a json file".format(exe_file))
         return None
@@ -114,7 +114,7 @@ def get_config():
         sys.exit("Error: Can not find version!")
     global version
     version = search.group(1)
-    print('{} {}'.format(test_type, version))
+    print('{}: {}. testset: {}'.format(test_type, version, data_version))
     return configs
 
 
@@ -249,5 +249,5 @@ if __name__ == "__main__":
         for i in range(len(all_id)):
             d_param = params[i]
             test_type, data_path, file_ext, crontab_time = \
-                d_param['test_type'], d_param['data_path'], d_param['ext'], d_param['ext']
+                d_param['test_type'], d_param['data_path'], d_param['ext'], d_param['time']
             main()
