@@ -22,7 +22,7 @@
 			"id": 1,
 			"test_type": "liveness",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.42",
-			"ext": "jpg",
+			"ext": "yuv",
 			"time": "",
 			"model": {
 				"align": "models/align/M_Align_occlusion_106_1.6.4.model",

@@ -7,10 +7,9 @@ Created on 2018/7/10
 """
 import json
 
-val_json = json.load(open('batch.json'))
 
-
-def get_params():
+def get_params(json_file):
+    val_json = json.load(json_file)
     list_params = []
     list_config = []
     params = ['id', 'test_type', 'data_path', 'ext', 'time']
@@ -35,6 +34,6 @@ def get_params():
 
 
 if __name__ == "__main__":
-    all_id, params, configs = get_params()
+    all_id, params, configs = get_params('batch.json')
     for i in range(len(all_id)):
         print(params[i])

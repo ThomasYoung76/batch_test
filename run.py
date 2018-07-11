@@ -12,8 +12,6 @@ import argparse
 import shutil
 import json
 import subprocess
-
-
 from pathlib import Path
 
 from s_config import *
@@ -27,6 +25,7 @@ PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
 
 
 def init_env():
+    print(">>> step 1: {}".format(sys._getframe().f_code.co_name))
     # 环境忙时等待空闲或者直接退出
     while check_process('sample'):
         if not is_wait_env_free:
@@ -52,6 +51,7 @@ def init_args():
 
 
 def check_args():
+    print(">>> step 2: {}".format(sys._getframe().f_code.co_name))
     if exe_file is not None:
         try:
             assert Path(exe_file).is_file()
@@ -91,11 +91,11 @@ def check_args():
 
 
 def get_param():
-    all_id, params, configs = s_json.get_params()
     pass
 
 
 def set_config():
+    print(">>> step 3: {}".format(sys._getframe().f_code.co_name))
     global data_version
     data_version = Path(data_path).name
     raw_config = Path(data_path).parent / "config" / (data_version + ".json")
@@ -152,6 +152,7 @@ def get_result_name():
 
 
 def prepare_data():
+    print(">>> step 4: {}".format(sys._getframe().f_code.co_name))
     # 暂时只支持liveness
     file_name = "{}{}{}".format(PATH_BASE, os.sep, "output/files.txt")
     label_name = "{}{}{}".format(PATH_BASE, os.sep, "output/labels.txt")
@@ -169,6 +170,7 @@ def prepare_data():
 
 
 def execute():
+    print(">>> step 5: {}".format(sys._getframe().f_code.co_name))
     start = datetime.datetime.now()
     global now
     now = datetime.datetime.strftime(start, '%Y%m%d_%H%M%S')
@@ -188,6 +190,7 @@ def execute():
 
 
 def optimize_result(raw_result, file_name, label_name):
+    print(">>> step 6: {}".format(sys._getframe().f_code.co_name))
     result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
     check_directory(result_dir)
     print("See result in {}".format(result_dir))
@@ -242,7 +245,7 @@ if __name__ == "__main__":
         main()
     else:
         # # 处理文件中的参数
-        all_id, params, configs = s_json.get_params()
+        all_id, params, configs = s_json.get_params(exe_file)
         for i in range(len(all_id)):
             d_param = params[i]
             test_type, data_path, file_ext, crontab_time = \
