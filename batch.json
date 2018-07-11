@@ -13,10 +13,10 @@
 				"liveness": "models/liveness/"
 			}, 
 			"input" : {
-			"width" : 640,
-			"height": 480,
-			"orient": "right",
-			"gray"  : false
+				"width" : 640,
+				"height": 480,
+				"orient": "right",
+				"gray"  : false
 			}
 		}, {
 			"id": 1,
