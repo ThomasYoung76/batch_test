@@ -9,7 +9,7 @@ import os
 import argparse
 from pathlib import Path
 
-input_dir = r"C:\Users\yangshifu\Documents\workspace\ali_data"
+input_dir = r"./"
 
 
 def list2file(result, file_name, first_row=None):
@@ -31,12 +31,21 @@ def list2file(result, file_name, first_row=None):
 #     return files, labels
 
 
-def get_files(src, file_type="jpg"):
-    """ 获取文件列表，文件相对于数据集的路径 """
+def get_files(src, file_type="jpg", is_abs=False):
+    """
+    获取文件列表
+    :param src: 数据集目录
+    :param file_type: 文件类型
+    :param is_abs: 是否获取文件的绝对路径
+    :return: 文件路径组成的列表
+    """
     p = Path(src)
     files = []
     for file_name in p.rglob("*.{}".format(file_type)):
-        file_name = file_name.relative_to(src)
+        if not is_abs:
+            file_name = file_name.relative_to(src)
+        else:
+            file_name = file_name.absolute()
         files.append(str(file_name))
     return files
 
@@ -77,7 +86,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--label', action='store_true', default=False, help="生成的label用于清洗还是跑批处理, 默认跑pc批处理")
     args = parser.parse_args()
 
-    files = get_files(args.input_dir, file_type='yuv')
+    files = get_files(args.input_dir, file_type='yuv', is_abs=True)
     if args.label:
         labels = get_labels_for_clean(files)
         list2file(labels, 'db_testset.label', first_row=str(len(labels)))
