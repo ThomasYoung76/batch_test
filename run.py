@@ -22,7 +22,7 @@ import s_json
 
 
 PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
-
+types = ['liveness', 'verify', 'detect', 'eyestate', 'gaze', 'landmark']
 
 def init_env():
     print(">>> step 1: {}".format(sys._getframe().f_code.co_name))
@@ -65,9 +65,9 @@ def check_args():
 
     # 参数检查
     try:
-        assert test_type in ['liveness', 'detect', 'verify']
+        assert test_type in types
     except AssertionError:
-        sys.exit("Error. Parameter: {} not in ['liveness', 'detect', 'verify']".format(test_type))
+        sys.exit("Error. Parameter: {} not in {}".format(test_type, types))
 
     if data_path is None:
         sys.exit("Error. Parameter: data_path cannot be None")
@@ -135,16 +135,10 @@ def check_data_set():
 
 
 def get_result_name():
-    if test_type == 'detect':
-        result = "{0}{1}{2}{1}{2}_output%files.txt.txt".format(
-            PATH_BASE, os.sep, test_type)
-    else:
-        result = "{0}{1}{2}{1}{2}_output%files.txt.csv".format(
-            PATH_BASE, os.sep, test_type)
+    result = "{0}{1}{2}{1}{2}_output%files.txt.csv".format(PATH_BASE, os.sep, test_type)
 
     if test_type == 'verify':
-        result = "{0}{1}{2}{1}{2}_score_output%i_enroll.txt.csv".format(
-            PATH_BASE, os.sep, test_type)
+        result = "{0}{1}{2}{1}{2}_score_output%i_enroll.txt.csv".format(PATH_BASE, os.sep, test_type)
 
     if Path(result).exists():
         os.remove(result)
@@ -159,9 +153,11 @@ def prepare_data():
     if file_ext:
         data_set[test_type]['file_type'] = file_ext
     ext = data_set[test_type]['file_type']
-    if test_type == 'liveness':
+    if test_type in ['liveness', 'eyestate']:
         files = get_files(data_path, file_type=ext, is_abs=True)
         labels = get_labels_for_pc(files, flag=data_set[test_type]['flag'])
+    elif test_type == 'verify':
+        pass
     else:
         sys.exit("目前只支持跑活体，其他批处理方式后续支持")
     list2file(files, file_name)
@@ -190,6 +186,13 @@ def execute():
 
 
 def optimize_result(raw_result, file_name, label_name):
+    """
+    优化结果
+    :param raw_result: scores文件
+    :param file_name:
+    :param label_name:
+    :return:
+    """
     print(">>> step 6: {}".format(sys._getframe().f_code.co_name))
     result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
     check_directory(result_dir)
@@ -205,13 +208,18 @@ def optimize_result(raw_result, file_name, label_name):
 
     # 写结果
     final_result = "{0}{1}{2}_result.xls".format(result_dir, os.sep, version)
-    df1, df2, df3, df4 = get_liveness_server_result(
-        new_result, file_name, label_name,
-        replace='', error_name=final_result)
+    if test_type == 'liveness':
+        df1, df2, df3, df4 = get_liveness_server_result(
+            new_result, file_name, label_name,
+            replace='', error_name=final_result)
 
-    # 写roc
-    roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
-    s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
+        # 写roc
+        roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
+        s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
+
+    if test_type == 'eyestate':
+        get_eyestate_server_result(values=raw_result, error_name=final_result)
+
 
 
 def analysis_result(result):
@@ -251,3 +259,4 @@ if __name__ == "__main__":
             test_type, data_path, file_ext, crontab_time = \
                 d_param['test_type'], d_param['data_path'], d_param['ext'], d_param['time']
             main()
+            time.sleep(2)

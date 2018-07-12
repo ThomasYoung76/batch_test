@@ -33,6 +33,10 @@ data_set = {
         'process': 'sample_liveness',
         'flag': 'photo/',
         'cmd': "nohup ./run -r output/i_enroll.txt output/i_real.txt > verify.log 2>&1 &",
+        },
+    "eyestate": {
+        'file_type': 'yuv',
+        'process': 'sample_eyestate',
+        'cmd': "nohup ./run -e output/files.txt > eyestate.log 2>&1 &",
         }
-
 }

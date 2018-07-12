@@ -19,7 +19,7 @@ def get_params(json_file):
         t_type = val_json[type_]
         for i in range(len(t_type)):
             dict_all = t_type[i]
-            if int(dict_all['id']) == -1:
+            if int(dict_all['id']) < 0:
                 continue
             id_ = dict_all['id']
             dict_params = dict([(k, dict_all.get(k)) for k in params])
