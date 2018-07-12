@@ -37,6 +37,7 @@ data_set = {
     "eyestate": {
         'file_type': 'yuv',
         'process': 'sample_eyestate',
+        'flag': 'photo/',
         'cmd': "nohup ./run -e output/files.txt > eyestate.log 2>&1 &",
         }
 }

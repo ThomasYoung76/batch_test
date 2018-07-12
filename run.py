@@ -207,7 +207,7 @@ def optimize_result(raw_result, file_name, label_name):
     shutil.copy2(PATH_CONFIG, result_dir)
 
     # 写结果
-    final_result = "{0}{1}{2}_result.xls".format(result_dir, os.sep, version)
+    final_result = "{0}{1}{2}_result.xlsx".format(result_dir, os.sep, version)
     if test_type == 'liveness':
         df1, df2, df3, df4 = get_liveness_server_result(
             new_result, file_name, label_name,
@@ -218,7 +218,7 @@ def optimize_result(raw_result, file_name, label_name):
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
 
     if test_type == 'eyestate':
-        get_eyestate_server_result(values=raw_result, error_name=final_result)
+        get_eyestate_server_result(scores=raw_result, files=file_name, error_name=final_result)
 
 
 

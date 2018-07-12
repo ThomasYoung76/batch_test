@@ -10,6 +10,7 @@ import time
 import shutil
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
@@ -204,24 +205,27 @@ def get_liveness_server_result(scores, files, labels, score=0.95,
     return df1, df2, df3, df4
 
 
-def get_eyestate_server_result(values, error_name="eye_error.xlsx"):
-    df = pd.read_csv(values, sep=' |,', engine='python',
-                     names=['left_score', 'left_valid', 'right_score', 'right_valid', 'name'])
-
+def get_eyestate_server_result(scores, files, error_name="eye_error.xlsx"):
+    df_score = pd.read_csv(scores, sep=' ', engine='c',
+                     names=['left_score', 'left_valid', 'right_score', 'right_valid'])
+    df_file = pd.read_csv(files, names=['filename'], dtype=np.str)
+    df = pd.concat([df_file, df_score], axis=1)
     df_unknow = df[df['left_score'] == -1]
     df_error = df[df['left_score'] == -2]
 
     df2 = df[df['left_score'] > -1]
-    close_error = df2[df2['name'].str.contains('/close/') & ((df2['left_score'] > 9.5) | (df2['right_score'] > 9.5))]
-    open_error = df2[df2['name'].str.contains('/open/') & (df2['left_score'] < 9.5) & (df2['right_score'] < 9.5)]
-    invalid_error = df2[
-        df2['name'].str.contains('/invalid/') & ((df2['left_valid'] > 9.5) | (df2['right_valid'] > 9.5))]
-    valid_error = df2[df2['name'].str.contains('/valid/') & (df2['left_valid'] < 9.5) & (df2['right_valid'] < 9.5)]
+
+    close_error = df2[df2['filename'].str.contains('/close') & ((df2['left_score'] > 9.5) | (df2['right_score'] > 9.5))]
+    open_error = df2[df2['filename'].str.contains('/open') & (df2['left_score'] < 9.5) & (df2['right_score'] < 9.5)]
+
     writer = pd.ExcelWriter(error_name)
+    df.to_excel(writer, sheet_name='图片汇总', index=False)
     df_unknow.to_excel(writer, sheet_name='未认识人脸', index=False)
     df_error.to_excel(writer, sheet_name='图片格式错误', index=False)
     close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
     open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
-    invalid_error.to_excel(writer, sheet_name='无效识别为有效', index=False)
-    valid_error.to_excel(writer, sheet_name='有效识别为无效', index=False)
     writer.save()
+
+
+if __name__ == "__main__":
+    get_eyestate_server_result(scores='output_eyestate.csv', files='image_list.txt')
