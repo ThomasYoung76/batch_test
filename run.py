@@ -22,7 +22,7 @@ import s_json
 
 
 PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
-types = ['liveness', 'verify', 'detect', 'eyestate', 'gaze', 'landmark']
+
 
 def init_env():
     print(">>> step 1: {}".format(sys._getframe().f_code.co_name))
@@ -40,7 +40,7 @@ def init_args():
     parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-p', '--test_type', action="store", default='liveness', help=u'测试类型')
     parser.add_argument('-d', '--data_path', action='store', help='数据集目录或者数据集的绝对路径')
-    parser.add_argument('-e', action='store', dest='ext', default='', help='文件扩展名，默认为ir')
+    parser.add_argument('-e', action='store', dest='ext', default='yuv', help='文件扩展名，默认为yuv')
     parser.add_argument('-t', action='store', dest='time', default=None, help='执行时间')
     parser.add_argument('-f', action='store', dest='file', help='带执行的文件')
     args = parser.parse_args()
@@ -67,10 +67,10 @@ def check_args():
     try:
         assert test_type in types
     except AssertionError:
-        sys.exit("Error. Parameter: {} not in {}".format(test_type, types))
+        sys.exit("Error. Parameter test_type: {} not in {}".format(test_type, types))
 
     if data_path is None:
-        sys.exit("Error. Parameter: data_path cannot be None")
+        sys.exit("Error. Parameter data_path cannot be None")
 
     # # 提供简洁的输入data_path的方法
     # if not data_path.startswith('/'):
@@ -81,13 +81,19 @@ def check_args():
 
     if not Path(data_path).exists():
         # print()
-        sys.exit("Error. Parameter: {} not exists. ".format(data_path))
+        sys.exit("Error. Parameter data_path: {} not exists. ".format(data_path))
+
+    if file_ext:
+        try:
+            assert file_ext in images
+        except AssertionError:
+            sys.exit("Error. Parameter ext: {} not in {}".format(file_ext, images))
 
     if crontab_time:
         try:
             datetime.datetime.strptime(crontab_time, "%H:%M")
         except:
-            sys.exit("Error. Parameter: {} is not time data, cannot match format '%H:%M".format(crontab_time))
+            sys.exit("Error. Parameter time: {} is not time data, cannot match format '%H:%M".format(crontab_time))
 
 
 def get_param():
@@ -150,12 +156,9 @@ def prepare_data():
     # 暂时只支持liveness
     file_name = "{}{}{}".format(PATH_BASE, os.sep, "output/files.txt")
     label_name = "{}{}{}".format(PATH_BASE, os.sep, "output/labels.txt")
-    if file_ext:
-        data_set[test_type]['file_type'] = file_ext
-    ext = data_set[test_type]['file_type']
     if test_type in ['liveness', 'eyestate']:
-        files = get_files(data_path, file_type=ext, is_abs=True)
-        labels = get_labels_for_pc(files, flag=data_set[test_type]['flag'])
+        files = get_files(data_path, file_type=file_ext, is_abs=True)
+        labels = get_labels_for_pc(files, flag=rgb_flag)
     elif test_type == 'verify':
         pass
     else:
@@ -165,17 +168,17 @@ def prepare_data():
     return file_name, label_name
 
 
-def execute():
+def execute(command):
     print(">>> step 5: {}".format(sys._getframe().f_code.co_name))
     start = datetime.datetime.now()
     global now
     now = datetime.datetime.strftime(start, '%Y%m%d_%H%M%S')
-    cmd = 'cd {} && {}'.format(PATH_BASE, data_set[test_type]['cmd'])
-    print(cmd)
-    ret = subprocess.call(cmd, shell=True)
+    new_cmd = 'cd {} && {}'.format(PATH_BASE, command)
+    print(new_cmd)
+    ret = subprocess.call(new_cmd, shell=True)
     if ret != 0:
         sys.exit("Error. command {} execute failed, see {}.log in {}".format(
-            data_set[test_type]['cmd'], test_type, PATH_BASE))
+            command, test_type, PATH_BASE))
     else:
         pass
     time.sleep(3)   # 等进程起来
@@ -235,7 +238,7 @@ def main():
     raw_result = get_result_name()
     file_path, label_path = prepare_data()
     wait_crontab(crontab_time)
-    execute()
+    execute(cmd[test_type])
     if not Path(raw_result).exists():
         wait_process('sample')
 
