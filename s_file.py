@@ -239,7 +239,8 @@ def get_eyestate_result(scores, files, error_name="eye_error.xlsx"):
 
 def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
     people = {}
-    enroll_list = os.path.join(os.path.dirname(i_enroll), 'enroll_list')
+    output = os.path.dirname(i_real)
+    enroll_list = os.path.join(output, 'enroll_list')
 
     if not os.path.exists(enroll_list):
         os.makedirs(enroll_list)
@@ -248,10 +249,10 @@ def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
         file_type = '_\d\.gray16'
 
     p = Path(data_path).absolute()
-    root = "{}{}".format(data_path.rstrip(os.sep), os.sep)
+    root = str(p)
 
     for path_person in p.glob('*'):
-        person = str(path_person)
+        person = path_person.name
         people[person] = list(path_person.rglob('*.{0}'.format(file_type)))
 
     label_enroll = np.array([], dtype=int)
@@ -262,13 +263,14 @@ def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
             for i, key in enumerate(people.keys()):
                 # enroll.write("{}/{}".format(enroll_list.rstrip(os.sep), key))
                 enroll.write(os.path.join(enroll_list, key))
+                enroll.write(os.linesep)
                 label_enroll = np.append(label_enroll, i)
                 with open(os.path.join(enroll_list, key), 'w') as roll:
                     for img in people[key]:
-                        if '/enroll/' in img.lower():
-                            roll.write('{}{}'.format(root, img))
+                        if '/enroll/' in str(img).lower():
+                            roll.write(os.path.join(root, str(img)))
                         else:
-                            real.write('{}{}'.format(root, img))
+                            real.write(os.path.join(root, str(img)))
                             label_real = np.append(label_real, i)
 
     with open(label_name, 'w') as label:

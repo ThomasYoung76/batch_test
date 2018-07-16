@@ -1,7 +1,7 @@
 import numpy as np
 
 # 路径
-PATH_BASE = '/mnt/lustre/yangshifu/faceunlock_test_general'   # 梁鼎的批处理工具路径
+PATH_BASE = '/mnt/lustre/yangshifu/release/linux-x86_64server'   # 梁鼎的批处理工具路径
 
 
 types = ('liveness', 'verify', 'detect', 'eyestate', 'gaze', 'landmark')    # 支持测试类型
