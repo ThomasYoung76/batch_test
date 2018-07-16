@@ -164,6 +164,7 @@ def cal_verify_roc(score_name, label_name, roc_name, fprs, is_one_vs_one=False):
     roc_list.append("|".join("  :-:  " for i in range(len(th_idx)+1)))
     roc_list.append("fpr(‰) | "+" | ".join('{:>5.2f}'.format(i*1000) for i in fpr[th_idx]))
     roc_list.append("tpr(%) | "+" | ".join('{:>5.2f}'.format(i*100) for i in tpr[th_idx]))
+    list2file(roc_list, roc_name)
 
 
 if __name__ == "__main__":

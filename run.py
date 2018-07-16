@@ -148,6 +148,9 @@ def check_data_set():
 def prepare_data():
     print(">>> step 4: {}".format(sys._getframe().f_code.co_name))
 
+    if not Path(output).exists():
+        os.makedirs(output)
+
     if test_type in ['liveness', 'eyestate']:
         build_liveness_input(data_path, file_type=file_ext, flag=rgb_flag, file_name=file_name, label_name=label_name)
     elif test_type == 'verify':
