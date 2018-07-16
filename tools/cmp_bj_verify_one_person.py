@@ -11,7 +11,7 @@ import pandas as pd
 
 phone_file = "frr_M_Verify_MimicG2Pruned_Common_3.70.0.model.csv"
 pc_file = "i_real.txt"
-output = "output.xls"
+output = "verify_output.xls"
 pc_score = 'verify_score_result%verify-2018-07-12_19-06-56--3.70.0%i_enroll.txt.csv'
 
 columns_phone = ['path', 'score']   # 路径和分数

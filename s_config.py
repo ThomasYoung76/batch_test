@@ -1,4 +1,3 @@
-import os
 import numpy as np
 
 # 路径
@@ -13,8 +12,8 @@ is_wait_env_free = False        # 其他测试正在进行时，是否等到环�
 is_wait_finish = True       # 是否等待脚本执行完成
 rgb_flag = 'photo/'   # rgb图片假人标识
 raw_flag = 'hack/'  # 3d图片假人标志
-fprs=[(0.1 - 0.01*p) for p in np.arange(0,10)]      # 写roc的fprs
-
+fprs=[(0.1 - 0.01*p) for p in np.arange(0, 10)]      # 写roc的fprs
+verify_score_thres = 0.7
 
 cmd = {
     "liveness": "nohup ./run -l output/files.txt > liveness.log 2>&1 & ",

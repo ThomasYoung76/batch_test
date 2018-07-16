@@ -22,6 +22,11 @@ import s_json
 
 
 PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
+output = os.path.join(PATH_BASE, 'output')
+file_name = os.path.join(output, 'files.txt')
+label_name = os.path.join(output, 'labels.txt')
+i_enroll = os.path.join(output, 'i_enroll.txt')
+i_real = os.path.join(output, 'i_real.txt')
 
 
 def init_env():
@@ -140,36 +145,28 @@ def check_data_set():
     pass
 
 
-def get_result_name():
-    result = "{0}{1}{2}{1}{2}_output%files.txt.csv".format(PATH_BASE, os.sep, test_type)
-
-    if test_type == 'verify':
-        result = "{0}{1}{2}{1}{2}_score_output%i_enroll.txt.csv".format(PATH_BASE, os.sep, test_type)
-
-    if Path(result).exists():
-        os.remove(result)
-    return result
-
-
 def prepare_data():
     print(">>> step 4: {}".format(sys._getframe().f_code.co_name))
-    # 暂时只支持liveness
-    file_name = "{}{}{}".format(PATH_BASE, os.sep, "output/files.txt")
-    label_name = "{}{}{}".format(PATH_BASE, os.sep, "output/labels.txt")
+
     if test_type in ['liveness', 'eyestate']:
-        files = get_files(data_path, file_type=file_ext, is_abs=True)
-        labels = get_labels_for_pc(files, flag=rgb_flag)
+        build_liveness_input(data_path, file_type=file_ext, flag=rgb_flag, file_name=file_name, label_name=label_name)
     elif test_type == 'verify':
-        pass
+        build_verify_input(data_path, file_type=file_ext, i_enroll=i_enroll, i_real=i_real, label_name=label_name)
     else:
-        sys.exit("目前只支持跑活体，其他批处理方式后续支持")
-    list2file(files, file_name)
-    list2file(labels, label_name)
-    return file_name, label_name
+        sys.exit("目前只支持跑活体比对，其他批处理方式后续支持")
 
 
 def execute(command):
     print(">>> step 5: {}".format(sys._getframe().f_code.co_name))
+
+    # 删除原result
+    if test_type == 'verify':
+        result = "{0}{1}{2}{1}{2}_score_output%i_enroll.txt.csv".format(PATH_BASE, os.sep, test_type)
+    else:
+        result = "{0}{1}{2}{1}{2}_output%files.txt.csv".format(PATH_BASE, os.sep, test_type)
+    if Path(result).exists():
+        os.remove(result)
+
     start = datetime.datetime.now()
     global now
     now = datetime.datetime.strftime(start, '%Y%m%d_%H%M%S')
@@ -181,14 +178,21 @@ def execute(command):
             command, test_type, PATH_BASE))
     else:
         pass
-    time.sleep(3)   # 等进程起来
+    time.sleep(4)   # 等进程起来
     # wait for result
     if not is_wait_finish:
         sys.exit('wait test finish. then see result in {}'.format(
             os.path.join(PATH_CONFIG, test_type)))
+    if not Path(result).exists():
+        wait_process('sample')
+    end = datetime.datetime.now()
+    gap = (end - datetime.datetime.strptime(now, '%Y%m%d_%H%M%S')).total_seconds()
+    print("Success. elapse time: {}s".format(gap))
+    time.sleep(2)
+    return result
 
 
-def optimize_result(raw_result, file_name, label_name):
+def optimize_result(raw_result):
     """
     优化结果
     :param raw_result: scores文件
@@ -211,18 +215,25 @@ def optimize_result(raw_result, file_name, label_name):
 
     # 写结果
     final_result = "{0}{1}{2}_result.xlsx".format(result_dir, os.sep, version)
+    roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
-        df1, df2, df3, df4 = get_liveness_server_result(
-            new_result, file_name, label_name,
-            replace='', error_name=final_result)
+        get_liveness_result(new_result, file_name, label_name, replace='', error_name=final_result)
 
         # 写roc
-        roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
 
     if test_type == 'eyestate':
-        get_eyestate_server_result(scores=raw_result, files=file_name, error_name=final_result)
+        get_eyestate_result(scores=raw_result, files=file_name, error_name=final_result)
 
+    if test_type == 'verify':
+
+        s_roc.cal_verify_roc(score_name=raw_result, label_name=label_name, roc_name=roc, fprs=fprs)
+
+        get_verify_server_result(i_enroll, file_name, new_result,
+            replace_file=data_path.rstrip(os.sep) + os.sep,
+            replace_name=PATH_BASE + '/output/enroll_list/',
+            error_name=final_result,
+        )
 
 
 def analysis_result(result):
@@ -235,18 +246,11 @@ def main():
     configs = get_config()
     check_config()
     check_data_set()
-    raw_result = get_result_name()
-    file_path, label_path = prepare_data()
+    prepare_data()
     wait_crontab(crontab_time)
-    execute(cmd[test_type])
-    if not Path(raw_result).exists():
-        wait_process('sample')
-
-    end = datetime.datetime.now()
-    gap = (end - datetime.datetime.strptime(now, '%Y%m%d_%H%M%S')).total_seconds()
-    print("Success. elapse time: {}s".format(gap))
-
-    optimize_result(raw_result, file_path, label_path)
+    result = execute(cmd[test_type])
+    optimize_result(result)
+    analysis_result(result)
 
 
 if __name__ == "__main__":

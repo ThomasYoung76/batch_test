@@ -7,7 +7,7 @@ import pandas as pd
 batch_file = "unlock_data.record.csv"
 server_file = "4.1.0-values.csv"
 
-output = "output.xls"
+output = "verify_output.xls"
 
 df_batch = pd.read_csv(batch_file, usecols=['ir name', 'Liveness score'])
 df_server = pd.read_csv(server_file, names=['score', 'name'])

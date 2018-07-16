@@ -82,6 +82,16 @@ def check_directory(name):
     Path(name).mkdir(parents=True, exist_ok=True)
 
 
+def build_liveness_input(data_path, file_type, flag, file_name, label_name):
+    if file_type == 'gray16':
+        file_type = '_\d\.gray16'
+    files = get_files(data_path, file_type=file_type, is_abs=True)
+    labels = get_labels_for_pc(files, flag=flag)
+    list2file(files, file_name)
+    list2file(labels, label_name)
+    return file_name, label_name
+
+
 def get_live_frr_far(df, colomn1, score, colomn2):
     total = len(df)
     # print(df.head())
@@ -123,9 +133,9 @@ def get_live_frr_far(df, colomn1, score, colomn2):
             num_3d_low, far_number_3d_low, far3d_low)
 
 
-def get_liveness_server_result(scores, files, labels, score=0.95,
-                               replace='/home/andrew/code/data/tof/base_test_data/vivo-liveness/',
-                               error_name="live_error.xlsx", type_=''):
+def get_liveness_result(scores, files, labels, score=0.95,
+                        replace='/home/andrew/code/data/tof/base_test_data/vivo-liveness/',
+                        error_name="live_error.xlsx", type_=''):
     cases = {
         "01": "注册",
         "02": "全脸-稳定拍摄",
@@ -205,7 +215,7 @@ def get_liveness_server_result(scores, files, labels, score=0.95,
     return df1, df2, df3, df4
 
 
-def get_eyestate_server_result(scores, files, error_name="eye_error.xlsx"):
+def get_eyestate_result(scores, files, error_name="eye_error.xlsx"):
     df_score = pd.read_csv(scores, sep=' ', engine='c',
                      names=['left_score', 'left_valid', 'right_score', 'right_valid'])
     df_file = pd.read_csv(files, names=['filename'], dtype=np.str)
@@ -227,5 +237,136 @@ def get_eyestate_server_result(scores, files, error_name="eye_error.xlsx"):
     writer.save()
 
 
+def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
+    people = {}
+    enroll_list = os.path.join(os.path.dirname(i_enroll), 'enroll_list')
+
+    if not os.path.exists(enroll_list):
+        os.makedirs(enroll_list)
+
+    if file_type == 'gray16':
+        file_type = '_\d\.gray16'
+
+    p = Path(data_path).absolute()
+    root = "{}{}".format(data_path.rstrip(os.sep), os.sep)
+
+    for path_person in p.glob('*'):
+        person = str(path_person)
+        people[person] = list(path_person.rglob('*.{0}'.format(file_type)))
+
+    label_enroll = np.array([], dtype=int)
+    label_real = np.array([], dtype=int)
+
+    with open(i_enroll, 'w') as enroll:
+        with open(i_real, 'w') as real:
+            for i, key in enumerate(people.keys()):
+                # enroll.write("{}/{}".format(enroll_list.rstrip(os.sep), key))
+                enroll.write(os.path.join(enroll_list, key))
+                label_enroll = np.append(label_enroll, i)
+                with open(os.path.join(enroll_list, key), 'w') as roll:
+                    for img in people[key]:
+                        if '/enroll/' in img.lower():
+                            roll.write('{}{}'.format(root, img))
+                        else:
+                            real.write('{}{}'.format(root, img))
+                            label_real = np.append(label_real, i)
+
+    with open(label_name, 'w') as label:
+        label_enroll.tofile(label, sep=' ')
+        label.write(os.linesep)
+        label_real.tofile(label, sep=' ')
+    return i_enroll, i_real, label_name
+
+
+def load_verify_server_result(names, files, scores, replace_file, replace_name="output/enroll_list/",
+                              ):
+    real_photos = pd.read_csv(files, names=['filename'])
+    real_photos['filename'] = real_photos['filename'].apply(
+        lambda x: x.replace(replace_file, ''))
+    real_photos['person'] = real_photos['filename'].apply(
+        lambda x: x.split('/')[0])
+
+    persons = pd.read_csv(names, names=['person'])
+    persons['person'] = persons['person'].apply(
+        lambda x: x.replace(replace_name, ''))
+
+    score = np.fromfile(scores, dtype=np.float32)
+    score = score.reshape(len(persons), len(real_photos))
+    df = pd.DataFrame(score, columns=real_photos['filename'])
+    df.index = persons['person']
+    return df, real_photos
+
+
+def get_verify_errors(df, real_photos, positive=0.7, negative=0.7):
+    other_errors = []
+    self_errors = []
+    self_nums = 0
+    other_nums = 0
+    for person in df.index:
+        print("index: {}   {}".format(person, time.ctime()))
+        row = df.loc[str(person)]
+        # print(row)
+        row.index = [real_photos['person'].astype(str), real_photos['filename']]
+        # print(row)
+        self = row[str(person)]
+        self_nums = self_nums + len(self)
+        self_error = self[(self < positive) & (self > -1)]
+        for item in self_error.index:
+            self_errors.append((item, self_error[item]))
+        # print(self_error)
+        others = row.drop(person, level=0)
+        other_nums = other_nums + len(others)
+        other_error = others[others >= negative]
+        for item in other_error.index:
+            other_errors.append([person, item[1], other_error.loc[item]])
+            # print(other_error)
+
+    df_person_errors = pd.DataFrame(self_errors, columns=['filename', 'score'])
+    df_other_errors = pd.DataFrame(other_errors, columns=['person', 'filename', 'score'])
+
+    return df_person_errors, df_other_errors, self_nums, other_nums
+
+
+def get_verify_frr_far(selfs_num, others_num, df_person_errors, df_other_errors, colomn, score):
+    frr_num = len(df_person_errors[df_person_errors[colomn] < score])
+    far_num = len(df_other_errors[df_other_errors[colomn] > score])
+    frr = 0 if not frr_num else frr_num / float(selfs_num)
+    far = 0 if not far_num else far_num / float(others_num)
+    return (far, frr, selfs_num + others_num, selfs_num, frr_num, others_num, far_num)
+
+
+def get_verify_server_result(names, files, scores, replace_file, replace_name="output/enroll_list/",
+                             error_name="verify_error.xlsx"):
+    df, real_photos = load_verify_server_result(names, files, scores, replace_file=replace_file,
+                                                replace_name=replace_name)
+
+    df.to_csv("scores.csv")
+
+    df_person_errors, df_other_errors, selfs_num, others_num = \
+        get_verify_errors(df, real_photos, positive=0.9, negative=0.7)
+
+    writer = pd.ExcelWriter(error_name)
+    df_person_errors.to_excel(writer, sheet_name='本人识别分值低于0.9', index=False)
+    df_other_errors.to_excel(writer, sheet_name='他人识别高于0.7', index=False)
+
+    values = [0.70, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.80,
+              0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.90]
+
+    results = []
+    for value in values:
+        result = get_verify_frr_far(
+            selfs_num, others_num, df_person_errors, df_other_errors, 'score',
+            value)
+        results.append([value, *result])
+
+    df4 = pd.DataFrame(
+        results,
+        columns=["Threshold", "FAR", "FRR", "number", "real_number", "frr_number",
+                 "no_number", "far_number"])
+
+    df4.to_excel(writer, sheet_name='FAR_FRR', index=False)
+    writer.save()
+
+
 if __name__ == "__main__":
-    get_eyestate_server_result(scores='output_eyestate.csv', files='image_list.txt')
+    get_eyestate_result(scores='output_eyestate.csv', files='image_list.txt')
