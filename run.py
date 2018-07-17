@@ -48,11 +48,12 @@ def init_args():
     parser.add_argument('-e', action='store', dest='ext', default='yuv', help='文件扩展名，默认为yuv')
     parser.add_argument('-t', action='store', dest='time', default=None, help='执行时间')
     parser.add_argument('-f', action='store', dest='file', help='带执行的文件')
+    parser.add_argument('-s', action='store', dest='section', default='', help='过滤部分数据集来执行')
     args = parser.parse_args()
 
-    global test_type, data_path, file_ext, crontab_time, exe_file
-    test_type, data_path, file_ext, crontab_time, exe_file = \
-        args.test_type, args.data_path, args.ext, args.time, args.file
+    global test_type, data_path, file_ext, crontab_time, exe_file, section
+    test_type, data_path, file_ext, crontab_time, exe_file, section = \
+        args.test_type, args.data_path, args.ext, args.time, args.file, args.section
 
 
 def check_args():
@@ -233,7 +234,8 @@ def optimize_result(raw_result):
     roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
         shutil.copy2(file_name, result_dir)
-        get_liveness_result(new_result, file_name, label_name, replace='', error_name=final_result)
+        get_liveness_result(new_result, file_name, label_name,
+                            score=liveness_score_thres, replace='', error_name=final_result)
 
         # 写roc
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)

@@ -12,6 +12,7 @@ is_wait_env_free = False        # 其他测试正在进行时，是否等到环�
 is_wait_finish = True       # 是否等待脚本执行完成
 liveness_flag = 'photo/'   # 图片假人标识
 fprs=[(0.1 - 0.01*p) for p in np.arange(0, 10)]      # 写roc的fprs
+liveness_score_thres = 0.95
 verify_score_thres = 0.7
 
 cmd = {

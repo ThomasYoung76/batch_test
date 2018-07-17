@@ -7,6 +7,7 @@ Created on 2018/7/9
 """
 import os
 import sys
+import re
 import time
 import shutil
 from pathlib import Path
@@ -15,13 +16,26 @@ import numpy as np
 import pandas as pd
 
 
-def list2file(result, file_name, first_row=None):
+def list2file(result, file_name, filter='', first_row=None):
     """ 将列表存入文件 """
     with open(file_name, 'w') as f:
         if first_row is not None:
             f.write('{}\n'.format(first_row))
         for row in result:
-            f.write('{}\n'.format(row))
+            if '|' in filter:
+                filters = filter.split('|')
+                for filter in filters:
+                    ret = re.search(filter, row)
+                    if not ret:
+                        continue
+                    else:
+                        f.write('{}\n'.format(row))
+            else:
+                ret = re.search(filter, row)
+                if ret:
+                    f.write('{}\n'.format(row))
+                else:
+                    continue
 
 
 def concat_list(list1, list2, sep=' '):
@@ -157,9 +171,7 @@ def get_live_frr_far(df, colomn1, score, colomn2):
             num_3d_low, far_number_3d_low, far3d_low)
 
 
-def get_liveness_result(scores, files, labels, score=0.95,
-                        replace='/home/andrew/code/data/tof/base_test_data/vivo-liveness/',
-                        error_name="live_error.xlsx", type_=''):
+def get_liveness_result(scores, files, labels, score=0.95, replace='', error_name="live_error.xlsx", version=''):
     cases = {
         "01": "注册",
         "02": "全脸-稳定拍摄",
@@ -192,7 +204,6 @@ def get_liveness_result(scores, files, labels, score=0.95,
 
     df = pd.concat([df_label, df_score, df_file], axis=1)
     df['type'] = df['filename'].apply(rename)
-    # print(df.head())
 
     results = []
 
@@ -226,7 +237,7 @@ def get_liveness_result(scores, files, labels, score=0.95,
         result = get_live_frr_far(df, 'score', value, 'label')
         results.append([value, *result])
 
-    columns = ["Threshold", "FAR", "FRR", "total",
+    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total",
                "real_num", "frr_num", "photo_num", "far_num", "unknow", "unknow_rate",
                'num_2d', 'far_number_2d', 'far2d',
                'num_3d', 'far_number_3d', 'far3d',
