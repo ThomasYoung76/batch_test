@@ -145,7 +145,7 @@ def cal_verify_roc(score_name, label_name, roc_name, fprs, is_one_vs_one=False):
     tpr = tp/total_pos_neg[0]
     fpr = fp/total_pos_neg[1]
     csvnp = np.array([thres, 1-tpr, fpr]).T
-    np.savetxt('verify/result.csv', csvnp, fmt='%.4f,%1.4e,%1.4e')
+    # np.savetxt('verify/result.csv', csvnp, fmt='%.4f,%1.4e,%1.4e')
     tpr_k_score = []
     th_k_score = []
     for fp in fprs:

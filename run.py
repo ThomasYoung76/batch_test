@@ -212,7 +212,7 @@ def optimize_result(raw_result):
         shutil.copyfile(raw_result, new_result)
     except FileNotFoundError as e:
         sys.exit(e)
-    shutil.copy2(file_name, result_dir)
+
     shutil.copy2(label_name, result_dir)
     shutil.copy2(PATH_CONFIG, result_dir)
 
@@ -220,6 +220,7 @@ def optimize_result(raw_result):
     final_result = "{0}{1}{2}_result.xlsx".format(result_dir, os.sep, version)
     roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
+        shutil.copy2(file_name, result_dir)
         get_liveness_result(new_result, file_name, label_name, replace='', error_name=final_result)
 
         # 写roc
@@ -229,7 +230,8 @@ def optimize_result(raw_result):
         get_eyestate_result(scores=raw_result, files=file_name, error_name=final_result)
 
     if test_type == 'verify':
-
+        shutil.copy2(i_real, result_dir)
+        shutil.copy2(i_enroll, result_dir)
         s_roc.cal_verify_roc(score_name=raw_result, label_name=label_name, roc_name=roc, fprs=fprs)
 
         get_verify_result(i_enroll, i_real, new_result,
