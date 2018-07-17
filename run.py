@@ -236,7 +236,7 @@ def optimize_result(raw_result):
     if test_type == 'liveness':
         shutil.copy2(file_name, result_dir)
         get_liveness_result(new_result, file_name, label_name,
-                            score=liveness_score_thres, replace='', error_name=final_result)
+                            score=liveness_score_thres, error_name=final_result)
 
         # 写roc
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)

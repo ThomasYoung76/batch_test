@@ -16,29 +16,13 @@ import numpy as np
 import pandas as pd
 
 
-def list2file(result, file_name, filter_='', first_row=None):
+def list2file(result, file_name, first_row=None):
     """ 将列表存入文件 """
     with open(file_name, 'w') as f:
         if first_row is not None:
             f.write('{}\n'.format(first_row))
         for row in result:
-            if filter_:
-                if '|' in filter_:
-                    filters = filter_.split('|')
-                    for filter_ in filters:
-                        ret = re.search(filter_, row)
-                        if not ret:
-                            continue
-                        else:
-                            f.write('{}\n'.format(row))
-                else:
-                    ret = re.search(filter_, row)
-                    if ret:
-                        f.write('{}\n'.format(row))
-                    else:
-                        continue
-            else:
-                f.write('{}\n'.format(row))
+            f.write('{}\n'.format(row))
 
 
 def concat_list(list1, list2, sep=' '):
@@ -54,7 +38,7 @@ def concat_list(list1, list2, sep=' '):
     return result
 
 
-def get_files(src, file_type="jpg", is_abs=False):
+def get_files(src, file_type="jpg", is_abs=False, filter_=''):
     """
     获取文件列表
     :param src: 数据集目录
@@ -69,7 +53,24 @@ def get_files(src, file_type="jpg", is_abs=False):
             file_name = file_name.relative_to(src)
         else:
             file_name = file_name.absolute()
-        files.append(str(file_name))
+        # 按filter_过滤
+        if filter_:
+            if '|' in filter_:
+                filters = filter_.split('|')
+                for filter_ in filters:
+                    ret = re.search(filter_, str(file_name))
+                    if not ret:
+                        continue
+                    else:
+                        files.append(str(file_name))
+            else:
+                ret = re.search(filter_, str(file_name))
+                if ret:
+                    files.append(str(file_name))
+                else:
+                    continue
+        else:
+            files.append(str(file_name))
     return files
 
 
@@ -119,16 +120,16 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
     if file_type == 'ir':
         file_type = ('ir', 'depth')
     if isinstance(file_type, tuple):
-        file_0 = get_files(data_path, file_type=file_type[0], is_abs=True)
-        file_1 = get_files(data_path, file_type=file_type[1], is_abs=True)
+        file_0 = get_files(data_path, file_type=file_type[0], is_abs=True, filter_=filter_)
+        file_1 = get_files(data_path, file_type=file_type[1], is_abs=True, filter_=filter_)
         file_0.sort(key=lambda x: Path(x).name)
         file_1.sort(key=lambda x: Path(x).name)
         files = concat_list(file_0, file_1, sep=' ')
         labels = get_labels_for_pc(file_0, flag=flag)
     else:
-        files = get_files(data_path, file_type=file_type, is_abs=True)
+        files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_)
         labels = get_labels_for_pc(files, flag=flag)
-    list2file(files, file_name, filter_=filter_)
+    list2file(files, file_name)
     list2file(labels, label_name)
     return file_name, label_name
 
@@ -174,29 +175,9 @@ def get_live_frr_far(df, colomn1, score, colomn2):
             num_3d_low, far_number_3d_low, far3d_low)
 
 
-def get_liveness_result(scores, files, labels, score=0.95, replace='', error_name="live_error.xlsx", version=''):
-    cases = {
-        "01": "注册",
-        "02": "全脸-稳定拍摄",
-        "03": "全脸-晃动拍摄",
-        "04": "半脸-鼻子以下超出画面",
-        "05": "半脸-眉毛以上超出画面",
-        "06": "遮挡大部分五官",
-        "07": "遮挡部分五官",
-        "08": "手机平放桌面",
-        "09": "一睁一闭",
-        "10": "闭眼(戴墨镜、裸眼、普通眼镜) ",
-        "11": "闭眼(戴墨镜、普通眼镜下滑挡住眼睛) ",
-        "12": "闭眼(手机晃动)",
-        "13": "注视",
-        "14": "非注视",
-        "15": "侧躺、平躺"}
-
+def get_liveness_result(scores, files, labels, score=0.95, error_name="live_error.xlsx", version=''):
     def rename(name):
-        type_ = os.path.dirname(name.replace(replace, "").split()[-1])
-        last = type_.split('/')[-1]
-        if last in cases and replace:
-            type_ = type_.replace(last, cases[last])
+        type_ = os.path.dirname(name.split()[-1])
         return type_
 
     df_score = pd.read_csv(scores, header=None, names=['score'], engine='c',
