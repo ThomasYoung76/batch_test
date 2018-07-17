@@ -211,7 +211,14 @@ def optimize_result(raw_result):
     print("See result in {}".format(result_dir))
     new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
     try:
-        shutil.copyfile(raw_result, new_result)
+        if test_type != 'detect':
+            shutil.copyfile(raw_result, new_result)
+        else:
+            # 检测的dt文件只含文件名
+            with open(raw_result, 'r') as rr:
+                with open(new_result, 'w') as nr:
+                    for line in rr.readlines():
+                        nr.write(line.split(os.sep)[-1])
     except FileNotFoundError as e:
         sys.exit(e)
 
@@ -241,6 +248,7 @@ def optimize_result(raw_result):
                           replace_name=PATH_BASE + '/output/enroll_list/',
                           error_name=final_result,
                           )
+
 
 
 def analysis_result(result):

@@ -17,7 +17,7 @@ verify_score_thres = 0.7
 
 cmd = {
     "liveness": "nohup ./run -l output/files.txt > liveness.log 2>&1 & ",
-    "detect": "nohup ./run -m output/files.txt > detect.log 2>&1 & ",
+    "detect": "nohup ./run -d output/files.txt > detect.log 2>&1 & ",
     "verify": "nohup ./run -r output/i_enroll.txt output/i_real.txt > verify.log 2>&1 &",
     "eyestate": "nohup ./run -e output/files.txt > eyestate.log 2>&1 &"
 }
