@@ -369,5 +369,10 @@ def get_verify_result(names, files, scores, replace_file, replace_name="output/e
     writer.save()
 
 
+def build_detect_input(data_path, file_type, file_name):
+    files = get_files(data_path, file_type=file_type, is_abs=True)
+    list2file(files, file_name)
+
+
 if __name__ == "__main__":
     get_eyestate_result(scores='output_eyestate.csv', files='image_list.txt')

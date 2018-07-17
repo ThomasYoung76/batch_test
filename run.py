@@ -155,6 +155,8 @@ def prepare_data():
         build_liveness_input(data_path, file_type=file_ext, flag=rgb_flag, file_name=file_name, label_name=label_name)
     elif test_type == 'verify':
         build_verify_input(data_path, file_type=file_ext, i_enroll=i_enroll, i_real=i_real, label_name=label_name)
+    elif test_type == 'detect':
+        build_detect_input(data_path, file_type=file_ext, file_name=file_name)
     else:
         sys.exit("目前只支持跑活体比对，其他批处理方式后续支持")
 
