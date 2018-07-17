@@ -153,7 +153,8 @@ def prepare_data():
         os.makedirs(output)
 
     if test_type in ['liveness', 'eyestate']:
-        build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag, file_name=file_name, label_name=label_name)
+        build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag,
+                             file_name=file_name, label_name=label_name, filter_=section)
     elif test_type == 'verify':
         build_verify_input(data_path, file_type=file_ext, i_enroll=i_enroll, i_real=i_real, label_name=label_name)
     elif test_type == 'detect':

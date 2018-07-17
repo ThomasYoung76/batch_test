@@ -16,26 +16,29 @@ import numpy as np
 import pandas as pd
 
 
-def list2file(result, file_name, filter='', first_row=None):
+def list2file(result, file_name, filter_='', first_row=None):
     """ 将列表存入文件 """
     with open(file_name, 'w') as f:
         if first_row is not None:
             f.write('{}\n'.format(first_row))
         for row in result:
-            if '|' in filter:
-                filters = filter.split('|')
-                for filter in filters:
-                    ret = re.search(filter, row)
-                    if not ret:
-                        continue
-                    else:
-                        f.write('{}\n'.format(row))
-            else:
-                ret = re.search(filter, row)
-                if ret:
-                    f.write('{}\n'.format(row))
+            if filter_:
+                if '|' in filter_:
+                    filters = filter_.split('|')
+                    for filter_ in filters:
+                        ret = re.search(filter_, row)
+                        if not ret:
+                            continue
+                        else:
+                            f.write('{}\n'.format(row))
                 else:
-                    continue
+                    ret = re.search(filter_, row)
+                    if ret:
+                        f.write('{}\n'.format(row))
+                    else:
+                        continue
+            else:
+                f.write('{}\n'.format(row))
 
 
 def concat_list(list1, list2, sep=' '):
@@ -110,7 +113,7 @@ def check_directory(name):
     Path(name).mkdir(parents=True, exist_ok=True)
 
 
-def build_liveness_input(data_path, file_type, flag, file_name, label_name):
+def build_liveness_input(data_path, file_type, flag, file_name, label_name, filter_):
     if file_type == 'gray16':
         file_type = ('_\d\.gray16', '_depth.gray16')
     if file_type == 'ir':
@@ -125,7 +128,7 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name):
     else:
         files = get_files(data_path, file_type=file_type, is_abs=True)
         labels = get_labels_for_pc(files, flag=flag)
-    list2file(files, file_name)
+    list2file(files, file_name, filter_=filter_)
     list2file(labels, label_name)
     return file_name, label_name
 
