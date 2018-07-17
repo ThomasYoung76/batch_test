@@ -6,6 +6,7 @@ Created on 2018/7/9
 @mail: yangshifu@sensetime.com
 """
 import os
+import sys
 import time
 import shutil
 from pathlib import Path
@@ -21,6 +22,19 @@ def list2file(result, file_name, first_row=None):
             f.write('{}\n'.format(first_row))
         for row in result:
             f.write('{}\n'.format(row))
+
+
+def concat_list(list1, list2, sep=' '):
+    try:
+        assert len(list1) == len(list2)
+    except:
+        sys.exit("length of {} is :{}, but length of {} is：{}. the length of two list must be same".format(
+            list1, len(list1), list2, len(list2)
+        ))
+    result = []
+    for i in range(len(list1)):
+        result.append("{}{}{}".format(list1[i], sep, list2[i]))
+    return result
 
 
 def get_files(src, file_type="jpg", is_abs=False):
@@ -84,9 +98,19 @@ def check_directory(name):
 
 def build_liveness_input(data_path, file_type, flag, file_name, label_name):
     if file_type == 'gray16':
-        file_type = '_\d\.gray16'
-    files = get_files(data_path, file_type=file_type, is_abs=True)
-    labels = get_labels_for_pc(files, flag=flag)
+        file_type = ('_\d\.gray16', '_depth.gray16')
+    if file_type == 'ir':
+        file_type = ('ir', 'depth')
+    if isinstance(file_type, tuple):
+        file_0 = get_files(data_path, file_type=file_type[0], is_abs=True)
+        file_1 = get_files(data_path, file_type=file_type[1], is_abs=True)
+        file_0.sort(key=lambda x: Path(x).name)
+        file_1.sort(key=lambda x: Path(x).name)
+        files = concat_list(file_0, file_1, sep=' ')
+        labels = get_labels_for_pc(file_0, flag=flag)
+    else:
+        files = get_files(data_path, file_type=file_type, is_abs=True)
+        labels = get_labels_for_pc(files, flag=flag)
     list2file(files, file_name)
     list2file(labels, label_name)
     return file_name, label_name
