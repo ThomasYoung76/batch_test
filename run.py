@@ -232,11 +232,11 @@ def optimize_result(raw_result):
 
         s_roc.cal_verify_roc(score_name=raw_result, label_name=label_name, roc_name=roc, fprs=fprs)
 
-        get_verify_server_result(i_enroll, file_name, new_result,
-            replace_file=data_path.rstrip(os.sep) + os.sep,
-            replace_name=PATH_BASE + '/output/enroll_list/',
-            error_name=final_result,
-        )
+        get_verify_result(i_enroll, i_real, new_result,
+                          replace_file=data_path.rstrip(os.sep) + os.sep,
+                          replace_name=PATH_BASE + '/output/enroll_list/',
+                          error_name=final_result,
+                          )
 
 
 def analysis_result(result):

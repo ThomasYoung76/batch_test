@@ -269,19 +269,20 @@ def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
                     for img in people[key]:
                         if '/enroll/' in str(img).lower():
                             roll.write(os.path.join(root, str(img)))
+                            roll.write(os.linesep)
                         else:
                             real.write(os.path.join(root, str(img)))
+                            real.write(os.linesep)
                             label_real = np.append(label_real, i)
 
     with open(label_name, 'w') as label:
         label_enroll.tofile(label, sep=' ')
-        label.write(os.linesep)
+        print('', file=label)
         label_real.tofile(label, sep=' ')
     return i_enroll, i_real, label_name
 
 
-def load_verify_server_result(names, files, scores, replace_file, replace_name="output/enroll_list/",
-                              ):
+def load_verify_server_result(names, files, scores, replace_file, replace_name="output/enroll_list/"):
     real_photos = pd.read_csv(files, names=['filename'])
     real_photos['filename'] = real_photos['filename'].apply(
         lambda x: x.replace(replace_file, ''))
@@ -337,8 +338,8 @@ def get_verify_frr_far(selfs_num, others_num, df_person_errors, df_other_errors,
     return (far, frr, selfs_num + others_num, selfs_num, frr_num, others_num, far_num)
 
 
-def get_verify_server_result(names, files, scores, replace_file, replace_name="output/enroll_list/",
-                             error_name="verify_error.xlsx"):
+def get_verify_result(names, files, scores, replace_file, replace_name="output/enroll_list/",
+                      error_name="verify_error.xlsx"):
     df, real_photos = load_verify_server_result(names, files, scores, replace_file=replace_file,
                                                 replace_name=replace_name)
 
@@ -356,9 +357,7 @@ def get_verify_server_result(names, files, scores, replace_file, replace_name="o
 
     results = []
     for value in values:
-        result = get_verify_frr_far(
-            selfs_num, others_num, df_person_errors, df_other_errors, 'score',
-            value)
+        result = get_verify_frr_far(selfs_num, others_num, df_person_errors, df_other_errors, 'score', value)
         results.append([value, *result])
 
     df4 = pd.DataFrame(

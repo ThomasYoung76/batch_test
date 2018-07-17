@@ -21,3 +21,19 @@ cmd = {
     "verify": "nohup ./run -r output/i_enroll.txt output/i_real.txt > verify.log 2>&1 &",
     "eyestate": "nohup ./run -e output/files.txt > eyestate.log 2>&1 &"
 }
+
+
+maps = {
+    "bj": {
+        "ip": "10.10.30.87",
+        "testset": "/ssd/testset"
+    },
+    "sz": {
+        "ip": "172.20.21.68",
+        "testset": "/mnt/lustre/yangshifu/testset"
+    },
+    "local": {
+        "ip": "172.20.17.200",
+        "testset": "/home/andrew/code/data/testset"
+    }
+}
