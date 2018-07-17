@@ -218,7 +218,10 @@ def optimize_result(raw_result):
             with open(raw_result, 'r') as rr:
                 with open(new_result, 'w') as nr:
                     for line in rr.readlines():
-                        nr.write(line.split(os.sep)[-1])
+                        if file_ext == 'jpg':
+                            nr.write(line.split(os.sep)[-1])
+                        if file_ext == 'ir':
+                            nr.write(line.split(os.sep)[-1].replace('.ir', '.ir.jpg'))
     except FileNotFoundError as e:
         sys.exit(e)
 
