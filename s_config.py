@@ -11,9 +11,9 @@ images = ('jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
 is_wait_env_free = False        # 其他测试正在进行时，是否等到环境空闲时执行，默认False，直接中断当前测试
 is_wait_finish = True       # 是否等待脚本执行完成
 liveness_flag = 'photo/'   # 图片假人标识
+liveness_score_thres = 0.99     # 活体阈值
+verify_score_thres = 0.7        # 比对阈值
 fprs=[(0.1 - 0.01*p) for p in np.arange(0, 10)]      # 写roc的fprs
-liveness_score_thres = 0.95
-verify_score_thres = 0.7
 
 cmd = {
     "liveness": "nohup ./run -l output/files.txt > liveness.log 2>&1 & ",

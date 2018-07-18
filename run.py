@@ -28,6 +28,25 @@ label_name = os.path.join(output, 'labels.txt')
 i_enroll = os.path.join(output, 'i_enroll.txt')
 i_real = os.path.join(output, 'i_real.txt')
 
+desc = """ pc端批处理测试, 使用方法示例：
+1. 活体批处理
+./run.py -p liveness -d ~/code/data/testset/2d/liveness/v2.6.41 -e yuv
+
+2. 凌晨2点钟跑比对批处理
+./run.py -p verify -d ~/code/data/testset/2d/verify/base_China500 -e jpg -t 02:00
+
+3. 从测试集中筛选部分数据跑活体批处理
+./run.py -p verify -d ~/code/data/LivenessLibDataxiaomi -e ir -s xiaomi_shifu      # 跑xiaomi_shifu目录的数据
+# 跑xiaomi_shifu和xiaomi_20180528的数据
+./run.py -p verify -d ~/code/data/LivenessLibDataxiaomi -e ir -s xiaomi_shifu:xiaomi_20180528   
+# 跑xiaomi_shifu和路径中包含2D的xiaomi_20180528的数据
+./run.py -p verify -d ~/code/data/LivenessLibDataxiaomi -e ir -s xiaomi_shifu:2D.*?xiaomi_20180528
+
+4. 通过文件来执行多项批处理测试
+./run.py -f input/liveness.json         # liveness.json可配置多个批处理任务，按id值从小到大的顺序执行测试任务
+"""
+
+
 
 def init_env():
     print(">>> step 1: {}".format(sys._getframe().f_code.co_name))
@@ -41,13 +60,12 @@ def init_env():
 
 
 def init_args():
-    desc = """ pc端批处理 """
     parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-p', '--test_type', action="store", default='liveness', help=u'测试类型')
-    parser.add_argument('-d', '--data_path', action='store', help='数据集目录或者数据集的绝对路径')
-    parser.add_argument('-e', action='store', dest='ext', default='yuv', help='文件扩展名，默认为yuv')
-    parser.add_argument('-t', action='store', dest='time', default=None, help='执行时间')
-    parser.add_argument('-f', action='store', dest='file', help='带执行的文件')
+    parser.add_argument('-p', dest='test_type', action="store", default='liveness', help="测试类型")
+    parser.add_argument('-d', dest='data_path', action='store', help='数据集目录或者数据集的绝对路径')
+    parser.add_argument('-e', action='store', dest='ext', default='yuv', help='文件类型，默认为yuv')
+    parser.add_argument('-t', action='store', dest='time', default=None, help='执行时间，格式类似"10:00"')
+    parser.add_argument('-f', action='store', dest='file', help='通过json文件来执行，配置该参数，则其他参数均忽略')
     parser.add_argument('-s', action='store', dest='section', default='', help='过滤部分数据集来执行')
     args = parser.parse_args()
 
