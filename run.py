@@ -28,7 +28,10 @@ label_name = os.path.join(output, 'labels.txt')
 i_enroll = os.path.join(output, 'i_enroll.txt')
 i_real = os.path.join(output, 'i_real.txt')
 
-desc = """ pc端批处理测试, 使用方法示例：
+desc = """pc端批处理测试, 
+支持测试类型：{test}
+支持图片类型：{image}
+使用方法示例：
 1. 活体批处理
 ./run.py -p liveness -d ~/code/data/testset/2d/liveness/v2.6.41 -e yuv
 
@@ -44,7 +47,8 @@ desc = """ pc端批处理测试, 使用方法示例：
 
 4. 通过文件来执行多项批处理测试
 ./run.py -f input/liveness.json         # liveness.json可配置多个批处理任务，按id值从小到大的顺序执行测试任务
-"""
+
+""".format(test=types, image=images)
 
 
 

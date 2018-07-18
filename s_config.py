@@ -4,8 +4,8 @@ import numpy as np
 PATH_BASE = '/mnt/lustre/yangshifu/release/linux-x86_64server'   # 梁鼎的批处理工具路径
 
 
-types = ('liveness', 'verify', 'detect', 'eyestate', 'gaze', 'landmark')    # 支持测试类型
-images = ('jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
+types = ('detect', 'liveness', 'verify')    # 支持测试类型
+images = ('png', 'jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
 
 # 配置信息
 is_wait_env_free = False        # 其他测试正在进行时，是否等到环境空闲时执行，默认False，直接中断当前测试
