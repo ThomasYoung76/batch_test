@@ -12,7 +12,7 @@
 
 ## 要求：
 ### 第一步，环境准备工作：
-- 运行init.sh, 命令：./init.sh000
+- 运行init.sh, 命令：./init.sh
 - 根据实际情况修改s_config.py, 将PATH_BASE的值改为实际环境中梁鼎工具的目录， 例如：PATH_BASE = '/opt/test_tools/faceunlock_test_general'
 
 ### 第二步，准备好测试集，以及测试集对应的配置文件：
