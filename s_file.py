@@ -131,7 +131,6 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
         labels = get_labels_for_pc(files, flag=flag)
     list2file(files, file_name)
     list2file(labels, label_name)
-    return file_name, label_name
 
 
 def get_live_frr_far(df, colomn1, score, colomn2):
@@ -175,7 +174,7 @@ def get_live_frr_far(df, colomn1, score, colomn2):
             num_3d_low, far_number_3d_low, far3d_low)
 
 
-def get_liveness_result(scores, files, labels, score=0.95, error_name="live_error.xlsx", version=''):
+def get_liveness_result(scores, files, labels, error_name, score=0.95, version=''):
     def rename(name):
         type_ = os.path.dirname(name.split()[-1])
         return type_
@@ -298,7 +297,6 @@ def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
         label_enroll.tofile(label, sep=' ')
         print('', file=label)
         label_real.tofile(label, sep=' ')
-    return i_enroll, i_real, label_name
 
 
 def load_verify_server_result(names, files, scores, replace_file, replace_name="output/enroll_list/"):
@@ -354,7 +352,7 @@ def get_verify_frr_far(selfs_num, others_num, df_person_errors, df_other_errors,
     far_num = len(df_other_errors[df_other_errors[colomn] > score])
     frr = 0 if not frr_num else frr_num / float(selfs_num)
     far = 0 if not far_num else far_num / float(others_num)
-    return (far, frr, selfs_num + others_num, selfs_num, frr_num, others_num, far_num)
+    return far, frr, selfs_num + others_num, selfs_num, frr_num, others_num, far_num
 
 
 def get_verify_result(names, files, scores, replace_file, replace_name="output/enroll_list/",

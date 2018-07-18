@@ -32,8 +32,12 @@ maps = {
         "ip": "172.20.21.68",
         "testset": "/mnt/lustre/yangshifu/testset"
     },
-    "local": {
+    "linux": {
         "ip": "172.20.17.200",
         "testset": "/home/andrew/code/data/testset"
+    },
+    "local": {
+        "ip": "",
+        "testset": r"\\172.20.17.200\secured\data\testset"
     }
 }

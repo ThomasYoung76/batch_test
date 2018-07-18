@@ -136,13 +136,12 @@ def set_config():
     if raw_config.is_file():
         shutil.copy2(raw_config, PATH_CONFIG)
 
-
-def get_config():
     try:
         with open(PATH_CONFIG) as f:
             configs = f.read()
     except FileNotFoundError as e:
         sys.exit(e)
+    # 获取版本号
     search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
     if not search:
         sys.exit("Error: Can not find version!")
@@ -150,6 +149,8 @@ def get_config():
     version = search.group(1)
     print('{}: {}. testset: {}'.format(test_type, version, data_version))
     return configs
+
+
 
 
 def check_config():
@@ -257,8 +258,8 @@ def optimize_result(raw_result):
     roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
         shutil.copy2(file_name, result_dir)
-        get_liveness_result(new_result, file_name, label_name,
-                            score=liveness_score_thres, error_name=final_result)
+        get_liveness_result(new_result, file_name, label_name, score=liveness_score_thres,
+                            error_name=final_result, version=version)
 
         # 写roc
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
@@ -285,7 +286,6 @@ def analysis_result(result):
 def main():
     check_args()
     set_config()
-    configs = get_config()
     check_config()
     check_data_set()
     prepare_data()
@@ -296,8 +296,8 @@ def main():
 
 
 if __name__ == "__main__":
-    init_env()
     init_args()
+    init_env()
     if not exe_file:
         main()
     else:
