@@ -283,7 +283,8 @@ if __name__ == "__main__":
         all_id, params, configs = s_json.get_params(exe_file)
         for i in range(len(all_id)):
             d_param = params[i]
-            test_type, data_path, file_ext, crontab_time = \
-                d_param['test_type'], d_param['data_path'], d_param['ext'], d_param['time']
+            test_type, data_path, file_ext, crontab_time, section = \
+                d_param.get('test_type', None), d_param.get('data_path', None), d_param.get('ext', None), \
+                d_param.get('time', ''), d_param.get('section', '')
             main()
             time.sleep(2)

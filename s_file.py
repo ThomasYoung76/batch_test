@@ -55,14 +55,14 @@ def get_files(src, file_type="jpg", is_abs=False, filter_=''):
             file_name = file_name.absolute()
         # 按filter_过滤
         if filter_:
-            if '|' in filter_:
-                filters = filter_.split('|')
-                for filter_ in filters:
-                    ret = re.search(filter_, str(file_name))
-                    if not ret:
-                        continue
-                    else:
-                        files.append(str(file_name))
+            if ':' in filter_:
+                filters = filter_.split(':')
+                new_filter = r'|'.join(filters)
+                ret = re.search(new_filter, str(file_name))
+                if not ret:
+                    continue
+                else:
+                    files.append(str(file_name))
             else:
                 ret = re.search(filter_, str(file_name))
                 if ret:

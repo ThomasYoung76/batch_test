@@ -12,7 +12,7 @@ def get_params(json_file):
     val_json = json.load(open(json_file))
     list_params = []
     list_config = []
-    params = ['id', 'test_type', 'data_path', 'ext', 'time']
+    params = ['id', 'test_type', 'data_path', 'ext', 'time', 'section']
     config = ['id', 'model', 'input', 'force_resize_max']
     all_id = []
     for type_ in val_json:
