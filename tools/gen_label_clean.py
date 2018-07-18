@@ -9,7 +9,7 @@ import os
 import argparse
 from pathlib import Path
 
-input_dir = r"./"
+input_dir = r"D:\doc\test_detect_rate\tongyong100"
 
 
 def list2file(result, file_name, first_row=None):
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--input_dir', action='store', default=input_dir,
                         help='数据集目录')
     parser.add_argument('-l', '--label', action='store_true', default=False, help="生成的label用于清洗还是跑批处理, 默认跑pc批处理")
-    parser.add_argument('-t', '--type', action='store', default='yuv', help='文件类型')
+    parser.add_argument('-t', '--type', action='store', default='jpg', help='文件类型')
     args = parser.parse_args()
 
     files = get_files(args.input_dir, file_type=args.type, is_abs=True)

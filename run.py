@@ -279,6 +279,10 @@ def optimize_result(raw_result):
                           )
 
 
+def to_db():
+    pass
+
+
 def analysis_result(result):
     pass  # 执行完成后分析结果
 
@@ -292,6 +296,7 @@ def main():
     wait_crontab(crontab_time)
     result = execute(cmd[test_type])
     optimize_result(result)
+    to_db()
     analysis_result(result)
 
 

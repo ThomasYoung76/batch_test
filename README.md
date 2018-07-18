@@ -1,14 +1,14 @@
 # 这个工具用来进行pc端批处理测试
-（基于梁顶的工具）
+    （基于梁顶的工具）
 主要功能：
-1.每个测试集对应一个配置文件
-2.支持gray16数据类型
-3.设置定时任务
-4.跑分前增加各种情况的检查点
-5.通过文件连续执行多条命令，且命令中可以设置使用不同的模型及其他配置信息
-6.通过命令id控制命令执行顺序，是否执行，及是否进行版本比对
-7.简单分析结果，执行多条命令时，给出每条命令的结果是否可能不合理(待定)
-8.结果写数据库（待定）
+    1.每个测试集对应一个配置文件
+    2.支持gray16数据类型
+    3.设置定时任务
+    4.跑分前增加各种情况的检查点
+    5.通过文件连续执行多条命令，且命令中可以设置使用不同的模型及其他配置信息
+    6.通过命令id控制命令执行顺序，是否执行，及是否进行版本比对
+    7.简单分析结果，执行多条命令时，给出每条命令的结果是否可能不合理(待定)
+    8.结果写数据库（待定）
 
 ## 要求：
 ### 第一步，环境准备工作：
@@ -16,42 +16,42 @@
 - 根据实际情况修改s_config.py, 将PATH_BASE的值改为实际环境中梁鼎工具的目录， 例如：PATH_BASE = '/opt/test_tools/faceunlock_test_general'
 
 ### 第二步，准备好测试集，以及测试集对应的配置文件：
-如测试集为：~/code/data/testset/2d/liveness/v2.6.41
-则测试集对应的配置文件为：~/code/data/testset/2d/liveness/config/v2.6.41.json
-（该json文件如果存在则代替梁鼎工具下的config.json文件，如果不存在，则config.json生效，建议配置，保证一个测试集对应一个配置文件）
-# 配置文件v2.6.41.json的内容
-{
-    "model" : {
-        "align": "models/align/M_Align_occlusion_106_1.6.4.model",
-        "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_360_4.7.4.model",
-        "verify": "models/verify/M_Verify_MimicG2Pruned_Common_3.67.0.model",
-        "liveness": "models/liveness/",
-        "head3d": "",
-        "eyestate": "",
-        "gaze_mn": ""
-    },
-    "input" : {
-        "width" : 640,
-        "height": 400,
-        "orient": "top",
-        "gray"  : true      # rgb图片则gray为False，3d图片为True
-    },
-    "intrinsic" : [
-        480.422444, 0,  320.977978,
-        0,  480.422444, 195.290545,
-        0,  0,  1
-    ],                      # 测试注视时才有用
-    "eyestate_thres" : 0.8, # 睁闭眼阈值
-    "feature_len" : 128,
-    "force_resize_max": 0,
-    "align_thres" : 0,      # align阈值，建议设置为0.1
-    "verify_cropped": false,
-    "input_prefix": "",
-    "output_prefix": "",
-    "save_aligned_img": false,
-    "benchmark": true,      # 设置为False，可屏蔽接口的打印信息
-    "use_snpe_gpu": true
-}
+    如测试集为：~/code/data/testset/2d/liveness/v2.6.41
+    则测试集对应的配置文件为：~/code/data/testset/2d/liveness/config/v2.6.41.json
+    （该json文件如果存在则代替梁鼎工具下的config.json文件，如果不存在，则config.json生效，建议配置，保证一个测试集对应一个配置文件）
+    配置文件v2.6.41.json的内容
+    {
+        "model" : {
+            "align": "models/align/M_Align_occlusion_106_1.6.4.model",
+            "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_360_4.7.4.model",
+            "verify": "models/verify/M_Verify_MimicG2Pruned_Common_3.67.0.model",
+            "liveness": "models/liveness/",
+            "head3d": "",
+            "eyestate": "",
+            "gaze_mn": ""
+        },
+        "input" : {
+            "width" : 640,
+            "height": 400,
+            "orient": "top",
+            "gray"  : true      # rgb图片则gray为False，3d图片为True
+        },
+        "intrinsic" : [
+            480.422444, 0,  320.977978,
+            0,  480.422444, 195.290545,
+            0,  0,  1
+        ],                      # 测试注视时才有用
+        "eyestate_thres" : 0.8, # 睁闭眼阈值
+        "feature_len" : 128,
+        "force_resize_max": 0,
+        "align_thres" : 0,      # align阈值，建议设置为0.1
+        "verify_cropped": false,
+        "input_prefix": "",
+        "output_prefix": "",
+        "save_aligned_img": false,
+        "benchmark": true,      # 设置为False，可屏蔽接口的打印信息
+        "use_snpe_gpu": true
+    }
 
 ### 第三步，根据实际情况修改s_config.py
 is_wait_env_free = False        # 其他测试正在进行时，是否等到环境空闲时执行，默认False，不等环境空闲直接中断当前测试，
