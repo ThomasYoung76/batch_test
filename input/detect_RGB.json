@@ -37,10 +37,10 @@
 			"ext": "jpg",
 			"time": "",
             "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_11.1.0.model"
             },
-            "force_resize_max": 0
-		},{
+            "force_resize_max": 320
+		}, {
 			"id": 4,
 			"test_type": "detect",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
@@ -49,7 +49,7 @@
             "model": {
                 "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
             },
-            "force_resize_max": 480
+            "force_resize_max": 0
 		},{
 			"id": 5,
 			"test_type": "detect",
@@ -59,7 +59,27 @@
             "model": {
                 "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
             },
+            "force_resize_max": 480
+		},{
+			"id": 6,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
+            },
             "force_resize_max": 432
+		},{
+			"id": 7,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
+            },
+            "force_resize_max": 320
 		}
 	]
 }

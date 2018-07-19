@@ -325,7 +325,7 @@ def analysis_result():
             report_name = Path(result) / "pr_report.txt"
             report = report_name.read_text()
             all_report[title] = report
-    analysis_result = 'result.json'
+    analysis_result = 'result_{}'.format(exe_file)
     json.dump(all_report, open(analysis_result, 'w'), indent=4, separators=(',', ':'))
 
 
