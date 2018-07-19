@@ -316,7 +316,7 @@ def analysis_result():
     all_report = {}
     for result in whole_result:
         if 'detect' in result:
-            detect_version = re.search('\d+.\d+.\d+', result).group()
+            detect_version = re.search('\d+\.\d+\.\d+', result).group()
             try:
                 resize = re.search('resize\d+', result).group()
             except:

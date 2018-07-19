@@ -1,0 +1,125 @@
+{
+	"detect":
+	[{
+			"id": 0,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+            },
+            "force_resize_max": 0
+		}, {
+			"id": 1,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+            },
+            "force_resize_max": 480
+		}, {
+			"id": 2,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+            },
+            "force_resize_max": 432
+		}, {
+			"id": 3,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.1.0.model"
+            },
+            "force_resize_max": 0
+		},{
+			"id": 4,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.1.0.model"
+            },
+            "force_resize_max": 480
+		},{
+			"id": 5,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.1.0.model"
+            },
+            "force_resize_max": 432
+		},{
+			"id": 6,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.2.0.model"
+            },
+            "force_resize_max": 0
+		},{
+			"id": 7,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.2.0.model"
+            },
+            "force_resize_max": 480
+		},{
+			"id": 8,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.2.0.model"
+            },
+            "force_resize_max": 432
+		},{
+			"id": 9,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_IR_10.2.0_encrypt.model"
+            },
+            "force_resize_max": 0
+		},{
+			"id": 10,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_IR_10.2.0_encrypt.model"
+            },
+            "force_resize_max": 480
+		},{
+			"id": 11,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
+			"ext": "ir",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_IR_10.2.0_encrypt.model"
+            },
+            "force_resize_max": 432
+		}
+	]
+}
