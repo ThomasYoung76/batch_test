@@ -17,7 +17,8 @@
 				"height": 480,
 				"orient": "right",
 				"gray"  : false
-			}
+			},
+			"force_resize_max": 640
 		}, {
 			"id": 1,
 			"test_type": "liveness",

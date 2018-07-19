@@ -27,6 +27,7 @@ file_name = os.path.join(output, 'files.txt')
 label_name = os.path.join(output, 'labels.txt')
 i_enroll = os.path.join(output, 'i_enroll.txt')
 i_real = os.path.join(output, 'i_real.txt')
+whole_result = []   # 存储全部结果的路径
 
 desc = """pc端批处理测试, 
 支持测试类型：{test}
@@ -80,6 +81,9 @@ def init_args():
 
 def check_args():
     print(">>> step 2: {}".format(sys._getframe().f_code.co_name))
+    print("test_type: {}. data_version: {}。 file_ext: {}. exe_time: {}. exe_file: {}. exe_section:{}".format(
+        test_type, Path(data_path).name, file_ext, crontab_time, exe_file, section)
+    )
     if exe_file is not None:
         try:
             assert Path(exe_file).is_file()
@@ -128,7 +132,7 @@ def get_param():
     pass
 
 
-def set_config():
+def set_config_by_id(id_=None):
     print(">>> step 3: {}".format(sys._getframe().f_code.co_name))
     global data_version
     data_version = Path(data_path).name
@@ -136,21 +140,22 @@ def set_config():
     if raw_config.is_file():
         shutil.copy2(raw_config, PATH_CONFIG)
 
+    # 根据id_值来修改config文件
+    if id_ is not None:
+        s_json.left_join_json(PATH_CONFIG, exe_file, id_=id_)
+
+    # 获取版本号
     try:
         with open(PATH_CONFIG) as f:
             configs = f.read()
     except FileNotFoundError as e:
         sys.exit(e)
-    # 获取版本号
     search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
     if not search:
         sys.exit("Error: Can not find version!")
     global version
     version = search.group(1)
     print('{}: {}. testset: {}'.format(test_type, version, data_version))
-    return configs
-
-
 
 
 def check_config():
@@ -226,8 +231,6 @@ def optimize_result(raw_result):
     """
     优化结果
     :param raw_result: scores文件
-    :param file_name:
-    :param label_name:
     :return:
     """
     print(">>> step 6: {}".format(sys._getframe().f_code.co_name))
@@ -239,7 +242,7 @@ def optimize_result(raw_result):
         if test_type != 'detect':
             shutil.copyfile(raw_result, new_result)
         else:
-            # 检测的dt文件只含文件名
+            # 检测的dt文件只含文件名，保持和gt对应
             with open(raw_result, 'r') as rr:
                 with open(new_result, 'w') as nr:
                     for line in rr.readlines():
@@ -275,21 +278,43 @@ def optimize_result(raw_result):
         get_verify_result(i_enroll, i_real, new_result,
                           replace_file=data_path.rstrip(os.sep) + os.sep,
                           replace_name=PATH_BASE + '/output/enroll_list/',
-                          error_name=final_result,
-                          )
+                          error_name=final_result,)
+    if test_type == 'detect':
+        if file_ext in ['yuv', 'jpg', 'png']:
+            gt_file = gt_rgb
+        else:
+            gt_file = gt_ir
+        cmp_dt_gt = "cd {} && python3 get_precision_recall.py --dt {} --gt {} --output_dir {}".format(
+            os.path.join(os.getcwd(), 'tools'), raw_result, gt_file, result_dir
+        )
+        ret = subprocess.call(cmp_dt_gt, shell=True)
+        if ret != 0:
+            sys.exit("Error. command {} execute failed, see {}.log in {}".format(
+                ret, test_type, PATH_BASE))
+        else:
+            pass
+
+    whole_result.append(result_dir)
 
 
 def to_db():
     pass
 
 
-def analysis_result(result):
-    pass  # 执行完成后分析结果
+def analysis_result():
+    """ 汇总结果、分析结果 """
+    all_report = {}
+    for result in whole_result:
+        if 'detect' in result:
+            detect_version = re.search('\d+.\d+.\d+', result).group()
+            report_name = Path(result) / "pr_report.txt"
+            report = report_name.read_text()
 
 
-def main():
+
+def main(id_=None):
     check_args()
-    set_config()
+    set_config_by_id(id_=id_)
     check_config()
     check_data_set()
     prepare_data()
@@ -297,7 +322,7 @@ def main():
     result = execute(cmd[test_type])
     optimize_result(result)
     to_db()
-    analysis_result(result)
+    analysis_result()
 
 
 if __name__ == "__main__":
@@ -306,12 +331,12 @@ if __name__ == "__main__":
     if not exe_file:
         main()
     else:
-        # # 处理文件中的参数
+        # 处理文件中的参数, 按id值来执行命令
         all_id, params, configs = s_json.get_params(exe_file)
         for i in range(len(all_id)):
             d_param = params[i]
             test_type, data_path, file_ext, crontab_time, section = \
                 d_param.get('test_type', None), d_param.get('data_path', None), d_param.get('ext', None), \
                 d_param.get('time', ''), d_param.get('section', '')
-            main()
+            main(id_=all_id[i])
             time.sleep(2)

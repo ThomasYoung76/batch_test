@@ -1,0 +1,25 @@
+{
+	"detect":
+	[{
+			"id": 0,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+            },
+            "force_resize_max": 0
+		}, {
+			"id": 1,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "yuv",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+            },
+            "force_resize_max": 320
+		}
+	]
+}
