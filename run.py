@@ -21,6 +21,7 @@ import s_roc
 import s_json
 
 
+cwd_dir = os.path.dirname(os.path.abspath(__file__))
 PATH_CONFIG = os.path.join(PATH_BASE, 'config.json')    # config.json的路径
 output = os.path.join(PATH_BASE, 'output')
 file_name = os.path.join(output, 'files.txt')
@@ -28,6 +29,7 @@ label_name = os.path.join(output, 'labels.txt')
 i_enroll = os.path.join(output, 'i_enroll.txt')
 i_real = os.path.join(output, 'i_real.txt')
 whole_result = []   # 存储全部结果的路径
+info = {}       # 存储模型等信息，如ip、resize大小
 
 desc = """pc端批处理测试, 
 支持测试类型：{test}
@@ -166,6 +168,9 @@ def check_config():
         if not Path(os.path.join(PATH_BASE, model)).exists():
             print("Error. model: {} not exist".format(model))
             sys.exit(0)
+    # 记录resize信息
+    resize = d.get('force_resize_max')
+    info['resize'] = resize
     # 检查配置信息是否正确，如jpg的width和hight必须为-1，2d图片的gray为false，读取图片的长宽高是否匹配等
     pass
 
@@ -234,7 +239,12 @@ def optimize_result(raw_result):
     :return:
     """
     print(">>> step 6: {}".format(sys._getframe().f_code.co_name))
-    result_dir = "{0}{1}result{1}{2}_{3}_{4}".format(PATH_BASE, os.sep, test_type, now, version)
+    size = info.get('resize', 0)
+    if size:
+        resize_info = '_resize{}'.format(size)
+    else:
+        resize_info = ''
+    result_dir = "{0}{1}result{1}{2}_{3}_{4}{5}".format(PATH_BASE, os.sep, test_type, now, version, resize_info)
     check_directory(result_dir)
     print("See result in {}".format(result_dir))
     new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
@@ -285,7 +295,7 @@ def optimize_result(raw_result):
         else:
             gt_file = gt_ir
         cmp_dt_gt = "cd {} && python3 get_precision_recall.py --dt {} --gt {} --output_dir {}".format(
-            os.path.join(os.getcwd(), 'tools'), raw_result, gt_file, result_dir
+            os.path.join(cwd_dir, 'tools'), new_result, gt_file, result_dir
         )
         ret = subprocess.call(cmp_dt_gt, shell=True)
         if ret != 0:
@@ -307,9 +317,16 @@ def analysis_result():
     for result in whole_result:
         if 'detect' in result:
             detect_version = re.search('\d+.\d+.\d+', result).group()
+            try:
+                resize = re.search('resize\d+', result).group()
+            except:
+                resize = ''
+            title = '{}_{}'.format(detect_version, resize)
             report_name = Path(result) / "pr_report.txt"
             report = report_name.read_text()
-
+            all_report[title] = report
+    analysis_result = 'result.json'
+    json.dump(all_report, open(analysis_result, 'w'), indent=4, separators=(',', ':'))
 
 
 def main(id_=None):
@@ -340,3 +357,6 @@ if __name__ == "__main__":
                 d_param.get('time', ''), d_param.get('section', '')
             main(id_=all_id[i])
             time.sleep(2)
+
+    if exe_file:
+        analysis_result()

@@ -7,19 +7,59 @@
 			"ext": "jpg",
 			"time": "",
             "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_11.1.0.model"
             },
             "force_resize_max": 0
 		}, {
 			"id": 1,
 			"test_type": "detect",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
-			"ext": "yuv",
+			"ext": "jpg",
 			"time": "",
             "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.0.1.model"
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_11.1.0.model"
             },
-            "force_resize_max": 320
+            "force_resize_max": 480
+		}, {
+			"id": 2,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_Gray_11.1.0.model"
+            },
+            "force_resize_max": 432
+		}, {
+			"id": 3,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
+            },
+            "force_resize_max": 0
+		},{
+			"id": 4,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
+            },
+            "force_resize_max": 480
+		},{
+			"id": 5,
+			"test_type": "detect",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"ext": "jpg",
+			"time": "",
+            "model": {
+                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.0.0.model"
+            },
+            "force_resize_max": 432
 		}
 	]
 }
