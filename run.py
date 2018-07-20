@@ -29,7 +29,7 @@ label_name = os.path.join(output, 'labels.txt')
 i_enroll = os.path.join(output, 'i_enroll.txt')
 i_real = os.path.join(output, 'i_real.txt')
 whole_result = []   # 存储全部结果的路径
-info = {}       # 存储模型等信息，如ip、resize大小
+info = {}       # 存储模型等信息，如ip、resize大小、命令id等
 
 desc = """pc端批处理测试, 
 支持测试类型：{test}
@@ -52,7 +52,6 @@ desc = """pc端批处理测试,
 ./run.py -f input/liveness.json         # liveness.json可配置多个批处理任务，按id值从小到大的顺序执行测试任务
 
 """.format(test=types, image=images)
-
 
 
 def init_env():
@@ -145,6 +144,7 @@ def set_config_by_id(id_=None):
     # 根据id_值来修改config文件
     if id_ is not None:
         s_json.left_join_json(PATH_CONFIG, exe_file, id_=id_)
+        info['id'] = id_
 
     # 获取版本号
     try:
@@ -169,8 +169,7 @@ def check_config():
             print("Error. model: {} not exist".format(model))
             sys.exit(0)
     # 记录resize信息
-    resize = d.get('force_resize_max')
-    info['resize'] = resize
+    info['resize'] = d.get('force_resize_max')
     # 检查配置信息是否正确，如jpg的width和hight必须为-1，2d图片的gray为false，读取图片的长宽高是否匹配等
     pass
 
@@ -232,19 +231,20 @@ def execute(command):
     return result
 
 
-def optimize_result(raw_result):
+def optimize_result(raw_result, id_=None):
     """
     优化结果
     :param raw_result: scores文件
+    :param id_: 命令id
     :return:
     """
     print(">>> step 6: {}".format(sys._getframe().f_code.co_name))
     size = info.get('resize', 0)
-    if size:
-        resize_info = '_resize{}'.format(size)
-    else:
-        resize_info = ''
-    result_dir = "{0}{1}result{1}{2}_{3}_{4}{5}".format(PATH_BASE, os.sep, test_type, now, version, resize_info)
+    resize_info = '_resize{}'.format(size) if size else ''
+    int_id = info.get('id', None)
+    id_info = '_id{}'.format(int_id) if int_id is not None else ''
+    result_dir = "{0}{1}result{1}{2}{3}_{4}_{5}{6}".format(
+        PATH_BASE, os.sep, test_type, id_info, now, version, resize_info)
     check_directory(result_dir)
     print("See result in {}".format(result_dir))
     new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
@@ -348,13 +348,13 @@ if __name__ == "__main__":
         main()
     else:
         # 处理文件中的参数, 按id值来执行命令
-        all_id, params, configs = s_json.get_params(exe_file)
-        for i in range(len(all_id)):
+        all_id, params = s_json.get_params(exe_file)
+        for i, item in enumerate(all_id):
             d_param = params[i]
             test_type, data_path, file_ext, crontab_time, section = \
                 d_param.get('test_type', None), d_param.get('data_path', None), d_param.get('ext', None), \
                 d_param.get('time', ''), d_param.get('section', '')
-            main(id_=all_id[i])
+            main(id_=item)
             time.sleep(2)
 
     if exe_file:
