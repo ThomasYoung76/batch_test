@@ -312,21 +312,20 @@ def to_db():
 
 
 def analysis_result():
-    """ 汇总结果、分析结果 """
-    all_report = {}
-    for result in whole_result:
-        if 'detect' in result:
-            detect_version = re.search('\d+\.\d+\.\d+', result).group()
-            try:
-                resize = re.search('resize\d+', result).group()
-            except:
-                resize = ''
-            title = '{}_{}'.format(detect_version, resize)
-            report_name = Path(result) / "pr_report.txt"
-            report = report_name.read_text()
-            all_report[title] = report
-    analysis_result = 'result_{}'.format(Path(exe_file).name)
-    json.dump(all_report, open(analysis_result, 'w'), indent=4, separators=(',', ':'))
+    """ 多个批处理一起跑时，对结果进行汇总分析 """
+    is_include_detect = any(list(filter(lambda x: 'detect' in x, whole_result)))
+    is_include_liveness = any(list(filter(lambda x: 'liveness' in x, whole_result)))
+    is_include_verify = any(list(filter(lambda x: 'verify' in x, whole_result)))
+
+    if is_include_detect:
+        analysis_result = 'result_{}'.format(Path(exe_file).name)
+        analysis_detect_result(whole_result, report_file="pr_report.txt", final_result_name=analysis_result)
+
+    if is_include_liveness:
+        pass
+
+    if is_include_verify:
+        pass
 
 
 def main(id_=None):

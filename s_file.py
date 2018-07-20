@@ -8,6 +8,7 @@ Created on 2018/7/9
 import os
 import sys
 import re
+import json
 import time
 import shutil
 from pathlib import Path
@@ -389,6 +390,25 @@ def get_verify_result(names, files, scores, replace_file, replace_name="output/e
 def build_detect_input(data_path, file_type, file_name):
     files = get_files(data_path, file_type=file_type, is_abs=True)
     list2file(files, file_name)
+
+
+def analysis_detect_result(all_result, report_file, final_result_name):
+    all_report = {}
+    for result in all_result:
+        if 'detect' in result:
+            detect_version = re.search('\d+\.\d+\.\d+', result).group()
+            try:
+                resize = re.search('resize\d+', result).group()
+            except:
+                resize = ''
+            title = '{}_{}'.format(detect_version, resize)
+            report_name = Path(result) / report_file
+            report = report_name.read_text()
+            all_report[title] = report
+    # analysis_result = 'result_{}'.format(Path(exe_file).name)
+    json.dump(all_report, open(final_result_name, 'w'), indent=4, separators=(',', ':'))
+
+
 
 
 if __name__ == "__main__":
