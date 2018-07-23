@@ -325,12 +325,12 @@ def analysis_result(list_id):
     result_dir = "{0}{1}result{1}result_{2}".format(PATH_BASE, os.sep, final_time)
 
     if is_include_detect:
-        result_dir = "{0}{1}result{1}result_detect".format(PATH_BASE, os.sep)
-        if not Path(result_dir).is_dir:
-            os.makedirs(result_dir)
+        # result_dir = "{0}{1}result{1}result_detect".format(PATH_BASE, os.sep)
+        # if not Path(result_dir).is_dir:
+        #     os.makedirs(result_dir)
         analysis_result = 'result_{}'.format(Path(exe_file).name)
         analysis_detect_result(whole_result, report_file="pr_report.txt", final_result_name=analysis_result)
-        shutil.move(analysis_result, result_dir)
+        # shutil.move(analysis_result, result_dir)
 
     if is_include_liveness:
         pass
