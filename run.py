@@ -254,6 +254,7 @@ def optimize_result(raw_result, id_=None):
     try:
         if test_type != 'detect':
             shutil.copyfile(raw_result, new_result)
+            shutil.copy2(label_name, result_dir)
         else:
             # 检测的dt文件只含文件名，保持和gt对应
             with open(raw_result, 'r') as rr:
@@ -266,7 +267,6 @@ def optimize_result(raw_result, id_=None):
     except FileNotFoundError as e:
         sys.exit(e)
 
-    shutil.copy2(label_name, result_dir)
     shutil.copy2(PATH_CONFIG, result_dir)
 
     # 写结果
