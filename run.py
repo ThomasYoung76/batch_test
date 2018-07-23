@@ -239,6 +239,9 @@ def optimize_result(raw_result, id_=None):
     :return:
     """
     print(">>> step 6: {}".format(sys._getframe().f_code.co_name))
+    # 创建output目录
+    if not Path(output).is_dir():
+        os.makedirs(output)
     size = info.get('resize', 0)
     resize_info = '_resize{}'.format(size) if size else ''
     int_id = info.get('id', None)
@@ -311,21 +314,29 @@ def to_db():
     pass
 
 
-def analysis_result():
+def analysis_result(list_id):
     """ 多个批处理一起跑时，对结果进行汇总分析 """
     is_include_detect = any(list(filter(lambda x: 'detect' in x, whole_result)))
     is_include_liveness = any(list(filter(lambda x: 'liveness' in x, whole_result)))
     is_include_verify = any(list(filter(lambda x: 'verify' in x, whole_result)))
 
+    final = datetime.datetime.now()
+    final_time = datetime.datetime.strftime(final, '%Y%m%d_%H%M%S')
+    result_dir = "{0}{1}result{1}result_{2}".format(PATH_BASE, os.sep, final_time)
+
     if is_include_detect:
+        result_dir = "{0}{1}result{1}result_detect".format(PATH_BASE, os.sep)
+        if not Path(result_dir).is_dir:
+            os.makedirs(result_dir)
         analysis_result = 'result_{}'.format(Path(exe_file).name)
         analysis_detect_result(whole_result, report_file="pr_report.txt", final_result_name=analysis_result)
+        shutil.move(analysis_result, result_dir)
 
     if is_include_liveness:
         pass
 
     if is_include_verify:
-        pass
+        analysis_verify_result(whole_result, list_id, ana_result_dir=result_dir)
 
 
 def main(id_=None):
@@ -337,8 +348,6 @@ def main(id_=None):
     wait_crontab(crontab_time)
     result = execute(cmd[test_type])
     optimize_result(result)
-    to_db()
-    analysis_result()
 
 
 if __name__ == "__main__":
@@ -357,5 +366,6 @@ if __name__ == "__main__":
             main(id_=item)
             time.sleep(2)
 
-    if exe_file:
-        analysis_result()
+        # 获取相同的id
+        same_id = set(list(filter(lambda x: True if all_id.count(x) >= 2 else False, all_id)))
+        analysis_result(same_id)

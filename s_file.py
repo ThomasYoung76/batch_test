@@ -12,6 +12,7 @@ import json
 import time
 import shutil
 from pathlib import Path
+import functools
 
 import numpy as np
 import pandas as pd
@@ -357,7 +358,7 @@ def get_verify_frr_far(selfs_num, others_num, df_person_errors, df_other_errors,
 
 
 def get_verify_result(names, files, scores, replace_file, replace_name="output/enroll_list/",
-                      error_name="verify_error.xlsx"):
+                      error_name="verify_error.xlsx", version=''):
     df, real_photos = load_verify_server_result(names, files, scores, replace_file=replace_file,
                                                 replace_name=replace_name)
 
@@ -380,7 +381,7 @@ def get_verify_result(names, files, scores, replace_file, replace_name="output/e
 
     df4 = pd.DataFrame(
         results,
-        columns=["Threshold", "FAR", "FRR", "number", "real_number", "frr_number",
+        columns=["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "number", "real_number", "frr_number",
                  "no_number", "far_number"])
 
     df4.to_excel(writer, sheet_name='FAR_FRR', index=False)
@@ -408,6 +409,38 @@ def analysis_detect_result(all_result, report_file, final_result_name):
     # analysis_result = 'result_{}'.format(Path(exe_file).name)
     json.dump(all_report, open(final_result_name, 'w'), indent=4, separators=(',', ':'))
 
+
+def analysis_verify_result(all_result, list_id, ana_result_dir):
+    """
+    分析比对结果
+    :param all_result:
+    :param list_id: 存在相同的命令id值的序列
+    :param result_dir: 最终分析结果的目录
+    :return:
+    """
+    if not Path(ana_result_dir).is_dir:
+        os.makedirs(ana_result_dir)
+    # key为id， value为空列表，用于存放结果
+    cmp_result = dict(zip(list_id, [[]]*len(list_id)))
+    for result in all_result:
+        val_id = re.search('_id(\d+)_', result).group(1)
+        version = re.search('\d+\.\d+\.\d+', result)
+        if int(val_id) not in list_id:
+            continue
+        # 拷贝roc
+        roc_file = str(list(Path(result).glob("*roc*"))[0])
+        shutil.move(roc_file, ana_result_dir)
+
+        # 结果汇总
+        result_file = str(list(Path(result).glob("*.xlsx"))[0])
+        df_far_frr = pd.read_excel(result_file, sheet_name='FAR_FRR', engine='xlsx',
+                                usecols=['Threshold', 'FAR-{}'.format(version), 'FRR-{}'.format(version)])
+        cmp_result[int(val_id)].append(df_far_frr)
+
+    for val in list_id:
+        df_result = functools.reduce(lambda a, b: a + b, cmp_result[val])
+        csv_result_name = os.path.join(ana_result_dir, 'id{}_far_frr.csv'.format(val))
+        df_result.to_csv(csv_result_name, index=False)
 
 
 
