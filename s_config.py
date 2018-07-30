@@ -6,7 +6,7 @@ gt_rgb = "/mnt/lustre/yangshifu/testset/2d/detect/tongyong/gt_20180615.txt"     
 gt_ir = "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo-detect_ir_test_new_gt.clean.txt"      # dt数据集的gt文件路径
 
 
-types = ('detect', 'liveness', 'verify')    # 支持测试类型
+types = ('detect', 'liveness', 'verify','eyestate')    # 支持测试类型
 images = ('png', 'jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
 
 # 配置信息
