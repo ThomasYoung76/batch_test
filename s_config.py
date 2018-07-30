@@ -15,8 +15,15 @@ is_wait_finish = True       # 是否等待脚本执行完成
 liveness_flag = 'photo/'   # 图片假人标识
 liveness_score_thres = 0.99     # 活体阈值
 verify_score_thres = 0.7        # 比对阈值
+eye_open_thres = 9.5           # 睁闭眼是否睁眼阈值
+eye_valid_thres = 9.5          # 睁闭眼是否有效阈值
 fprs=[(0.1 - 0.01*p) for p in np.arange(0, 10)]      # 写roc的fprs
+use_sequence = False     # 采用多帧策略时，设置为True，"eyestate"将开启时序模式来判断睁闭眼。此时，输入的列表中，每一段序列靠空行分隔开。
 
+
+# 服务器配置
+linux_ip = "172.20.17.200"      # 深圳服务器ip，除此ip外其他均视为集群，数据需要回传到该ip所在服务上
+collect_result = ""
 
 
 cmd = {
@@ -24,24 +31,4 @@ cmd = {
     "detect": "nohup ./run -d output/files.txt > detect.log 2>&1 & ",
     "verify": "nohup ./run -r output/i_enroll.txt output/i_real.txt > verify.log 2>&1 &",
     "eyestate": "nohup ./run -e output/files.txt > eyestate.log 2>&1 &"
-}
-
-
-maps = {
-    "bj": {
-        "ip": "10.10.30.87",
-        "testset": "/ssd/testset"
-    },
-    "sz": {
-        "ip": "172.20.21.68",
-        "testset": "/mnt/lustre/yangshifu/testset"
-    },
-    "linux": {
-        "ip": "172.20.17.200",
-        "testset": "/home/andrew/code/data/testset"
-    },
-    "local": {
-        "ip": "",
-        "testset": r"\\172.20.17.200\secured\data\testset"
-    }
 }

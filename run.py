@@ -185,8 +185,12 @@ def prepare_data():
         os.makedirs(output)
 
     if test_type in ['liveness', 'eyestate']:
-        build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag,
-                             file_name=file_name, label_name=label_name, filter_=section)
+        if use_sequence:
+            build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag,
+                                 file_name=file_name, label_name=label_name, filter_=section, is_multi_frame=True)
+        else:
+            build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag,
+                                 file_name=file_name, label_name=label_name, filter_=section)
     elif test_type == 'verify':
         build_verify_input(data_path, file_type=file_ext, i_enroll=i_enroll, i_real=i_real, label_name=label_name)
     elif test_type == 'detect':
@@ -274,14 +278,15 @@ def optimize_result(raw_result, id_=None):
     roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
         shutil.copy2(file_name, result_dir)
-        get_liveness_result(new_result, file_name, label_name, score=liveness_score_thres,
+        get_liveness_result(new_result, file_name, label_name, score_thres=liveness_score_thres,
                             error_name=final_result, version=version)
 
         # 写roc
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
 
     if test_type == 'eyestate':
-        get_eyestate_result(scores=raw_result, files=file_name, error_name=final_result)
+        get_eyestate_result(scores=raw_result, files=file_name, error_name=final_result,
+                            open_thres=eye_open_thres, valid_thres=eye_valid_thres)
 
     if test_type == 'verify':
         shutil.copy2(i_real, result_dir)

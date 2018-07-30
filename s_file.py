@@ -40,12 +40,14 @@ def concat_list(list1, list2, sep=' '):
     return result
 
 
-def get_files(src, file_type="jpg", is_abs=False, filter_=''):
+def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=False):
     """
     获取文件列表
     :param src: 数据集目录
     :param file_type: 文件类型
     :param is_abs: 是否获取文件的绝对路径
+    :param filter_: 路径过滤的正则表达式
+    :param is_multi_frame: 测试集是否采用多帧策略
     :return: 文件路径组成的列表
     """
     p = Path(src)
@@ -55,6 +57,8 @@ def get_files(src, file_type="jpg", is_abs=False, filter_=''):
             file_name = file_name.relative_to(src)
         else:
             file_name = file_name.absolute()
+        file_dir = str(file_name.parent)    # 文件的父路径
+
         # 按filter_过滤
         if filter_:
             if ':' in filter_:
@@ -73,6 +77,11 @@ def get_files(src, file_type="jpg", is_abs=False, filter_=''):
                     continue
         else:
             files.append(str(file_name))
+
+        # 如果连续两个文件不在同一目录，则用空格分开, (多帧策略要求）
+        if is_multi_frame and files[-1] != file_dir:
+            files.append('')
+
     return files
 
 
@@ -116,7 +125,7 @@ def check_directory(name):
     Path(name).mkdir(parents=True, exist_ok=True)
 
 
-def build_liveness_input(data_path, file_type, flag, file_name, label_name, filter_):
+def build_liveness_input(data_path, file_type, flag, file_name, label_name, filter_, is_multi_frame=False):
     if file_type == 'gray16':
         file_type = ('_\d\.gray16', '_depth.gray16')
     if file_type == 'ir':
@@ -129,7 +138,7 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
         files = concat_list(file_0, file_1, sep=' ')
         labels = get_labels_for_pc(file_0, flag=flag)
     else:
-        files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_)
+        files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_, is_multi_frame=is_multi_frame)
         labels = get_labels_for_pc(files, flag=flag)
     list2file(files, file_name)
     list2file(labels, label_name)
@@ -176,7 +185,7 @@ def get_live_frr_far(df, colomn1, score, colomn2):
             num_3d_low, far_number_3d_low, far3d_low)
 
 
-def get_liveness_result(scores, files, labels, error_name, score=0.95, version=''):
+def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, version=''):
     def rename(name):
         type_ = os.path.dirname(name.split()[-1])
         return type_
@@ -193,18 +202,18 @@ def get_liveness_result(scores, files, labels, error_name, score=0.95, version='
     results = []
 
     for name, group in df.groupby('type'):
-        result = get_live_frr_far(group, 'score', score, 'label')
+        result = get_live_frr_far(group, 'score', score_thres, 'label')
         results.append([name, *result[:9]])
 
     for name, group in df.groupby('label'):
-        result = get_live_frr_far(group, 'score', score, 'label')
+        result = get_live_frr_far(group, 'score', score_thres, 'label')
         results.append([name, *result[:9]])
 
         # 真人识别为假人
-    df1 = df.loc[((df['score'] > score) & (df['label'] == 0))]
+    df1 = df.loc[((df['score'] > score_thres) & (df['label'] == 0))]
     # 假人识别为真人
-    df2 = df.loc[((df['score'] < score) & (df['label'] == 1))]
-    result = get_live_frr_far(df, 'score', score, 'label')
+    df2 = df.loc[((df['score'] < score_thres) & (df['label'] == 1))]
+    result = get_live_frr_far(df, 'score', score_thres, 'label')
     results.append(["All", *result[:9]])
     writer = pd.ExcelWriter(error_name)
     df1.to_excel(writer, sheet_name='真人识别为假人', index=False)
@@ -235,7 +244,7 @@ def get_liveness_result(scores, files, labels, error_name, score=0.95, version='
     return df1, df2, df3, df4
 
 
-def get_eyestate_result(scores, files, error_name="eye_error.xlsx"):
+def get_eyestate_result(scores, files, open_thres, valid_thres, error_name="eye_error.xlsx"):
     df_score = pd.read_csv(scores, sep=' ', engine='c',
                      names=['left_score', 'left_valid', 'right_score', 'right_valid'])
     df_file = pd.read_csv(files, names=['filename'], dtype=np.str)
@@ -245,15 +254,19 @@ def get_eyestate_result(scores, files, error_name="eye_error.xlsx"):
 
     df2 = df[df['left_score'] > -1]
 
-    close_error = df2[df2['filename'].str.contains('/close') & ((df2['left_score'] > 9.5) | (df2['right_score'] > 9.5))]
-    open_error = df2[df2['filename'].str.contains('/open') & (df2['left_score'] < 9.5) & (df2['right_score'] < 9.5)]
-
+    close_error = df2[df2['filename'].str.contains('/close') & ((df2['left_score'] > open_thres) | (df2['right_score'] > open_thres))]
+    open_error = df2[df2['filename'].str.contains('/open') & (df2['left_score'] < open_thres) & (df2['right_score'] < open_thres)]
+    invalid_error = df2[
+        df2['name'].str.contains('/invalid/') & ((df2['left_valid'] > valid_thres) | (df2['right_valid'] > valid_thres))]
+    valid_error = df2[df2['name'].str.contains('/valid/') & (df2['left_valid'] < valid_thres) & (df2['right_valid'] < valid_thres)]
     writer = pd.ExcelWriter(error_name)
     df.to_excel(writer, sheet_name='图片汇总', index=False)
     df_unknow.to_excel(writer, sheet_name='未认识人脸', index=False)
     df_error.to_excel(writer, sheet_name='图片格式错误', index=False)
     close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
     open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
+    invalid_error.to_excel(writer, sheet_name="无效识别为有效", index=False)
+    valid_error.to_excel(writer, sheet_name="有效识别为无效", index=False)
     writer.save()
 
 
@@ -443,6 +456,5 @@ def analysis_verify_result(all_result, list_id, ana_result_dir):
         df_result.to_csv(csv_result_name, index=False)
 
 
-
 if __name__ == "__main__":
-    get_eyestate_result(scores='output_eyestate.csv', files='image_list.txt')
+    get_eyestate_result(scores='output_eyestate.csv', files='image_list.txt', open_thres=9.5, valid_thres=9.5)
