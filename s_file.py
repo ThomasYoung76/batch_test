@@ -11,6 +11,7 @@ import re
 import json
 import time
 import shutil
+import csv
 from pathlib import Path
 import functools
 
@@ -40,7 +41,7 @@ def concat_list(list1, list2, sep=' '):
     return result
 
 
-def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=False):
+def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=False, is_line_sep=False):
     """
     获取文件列表
     :param src: 数据集目录
@@ -57,7 +58,11 @@ def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=Fal
             file_name = file_name.relative_to(src)
         else:
             file_name = file_name.absolute()
-        file_dir = str(file_name.parent)    # 文件的父路径
+
+        # 增加判断文件大小是否为0的逻辑
+        if not os.path.getsize(file_name):
+            print("Warning: file's size is zero. file path: {}".format(file_name))
+            continue
 
         # 按filter_过滤
         if filter_:
@@ -78,10 +83,24 @@ def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=Fal
         else:
             files.append(str(file_name))
 
-        # 如果连续两个文件不在同一目录，则用空格分开, (多帧策略要求）
-        if is_multi_frame and files[-1] != file_dir:
-            files.append('')
+    # 如果连续两个文件不在同一目录，则用空格分开, (多帧策略要求）
+    if is_multi_frame:
+        dirs = list(map(lambda x: os.path.dirname(x), files))
+        space_count = 0
+        for i, d in enumerate(dirs):
+            if i == 0:
+                continue
+            if dirs[i] != dirs[i-1]:
+                files.insert(i+space_count, '')
+                space_count += 1
 
+    # 每行之间加空行，用多帧模型跑单帧策略时文件列表采用这种方式
+    if is_line_sep:
+        linenum = 1
+        length_files = len(files)
+        for i in range(length_files):
+            files.insert(i + linenum, is_line_sep)
+            linenum += 1
     return files
 
 
@@ -94,19 +113,29 @@ def get_labels_for_clean(files):
     return labels
 
 
-def get_labels_for_pc(files, flag='hack'):
+def get_labels_for_pc(files, flag='human_test'):
     """
     获取文件列表对应的labels
     :param files: 文件列表
-    :param flag: 假人标志
+    :param flag: 真人标志
     :return:
     """
     labels = []
     for f in files:
-        if flag.lower() in f.lower():
-            labels.append(1)
+        # 忽略空行
+        if not f:
+            continue
+        if isinstance(flag, str):
+            # 真人为0，假人为1
+            if flag.lower() in f.lower():
+                labels.append(0)
+            else:
+                labels.append(1)
         else:
-            labels.append(0)
+            if any(list(filter(lambda x: x.lower() in f.lower(), flag))):
+                labels.append(0)
+            else:
+                labels.append(1)
     return labels
 
 
@@ -125,7 +154,8 @@ def check_directory(name):
     Path(name).mkdir(parents=True, exist_ok=True)
 
 
-def build_liveness_input(data_path, file_type, flag, file_name, label_name, filter_, is_multi_frame=False):
+def build_liveness_input(data_path, file_type, flag, file_name, label_name, filter_,
+                         is_multi_frame=False, is_line_sep=False):
     if file_type == 'gray16':
         file_type = ('_\d\.gray16', '_depth.gray16')
     if file_type == 'ir':
@@ -138,23 +168,24 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
         files = concat_list(file_0, file_1, sep=' ')
         labels = get_labels_for_pc(file_0, flag=flag)
     else:
-        files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_, is_multi_frame=is_multi_frame)
+        files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_,
+                          is_multi_frame=is_multi_frame, is_line_sep=is_line_sep)
         labels = get_labels_for_pc(files, flag=flag)
     list2file(files, file_name)
     list2file(labels, label_name)
 
 
-def get_live_frr_far(df, colomn1, score, colomn2):
+def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
     total = len(df)
     # print(df.head())
     unknow = len(df[df[colomn1] == -1])
     df = df[df[colomn1] != -1]
     real_number = len(df[df[colomn2] == 0])
     photo_number = len(df[df[colomn2] == 1])
-    num_2d = len(df.loc[df['filename'].str.contains('/2D_photo/')])
-    num_3d = len(df.loc[df['filename'].str.contains('/3D_photo/')])
-    num_3d_high = len(df.loc[df['filename'].str.contains('/3D_Highcost/')])
-    num_3d_low = len(df.loc[df['filename'].str.contains('/3D_Lowcost/')])
+    num_2d = len(df.loc[df[column_filename].str.contains('/2D_photo/')])
+    num_3d = len(df.loc[df[column_filename].str.contains('/3D_photo/')])
+    num_3d_high = len(df.loc[df[column_filename].str.contains('/3D_Highcost/')])
+    num_3d_low = len(df.loc[df[column_filename].str.contains('/3D_Lowcost/')])
 
     # 真人识别为假人
     frr_number = len(df.loc[((df[colomn1] > score) & (df[colomn2] == 0))])
@@ -164,14 +195,14 @@ def get_live_frr_far(df, colomn1, score, colomn2):
 
     far_number_2d = far_number_3d = 0
     far_number_2d = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                df['filename'].str.contains('/2D_photo/', regex=False))])
+                                df[column_filename].str.contains('/2D_photo/', regex=False))])
     ## 3d假人识别为真人
     far_number_3d = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                df['filename'].str.contains('/3D_photo/', regex=False))])
+                                df[column_filename].str.contains('/3D_photo/', regex=False))])
     far_number_3d_high = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                     df['filename'].str.contains('/3D_Highcost/', regex=False))])
+                                     df[column_filename].str.contains('/3D_Highcost/', regex=False))])
     far_number_3d_low = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                    df['filename'].str.contains('/3D_Lowcost/', regex=False))])
+                                    df[column_filename].str.contains('/3D_Lowcost/', regex=False))])
     frr = 0 if not real_number else frr_number / float(real_number)
     far2d = 0 if not num_2d else far_number_2d / float(num_2d)
     far3d = 0 if not num_3d else far_number_3d / float(num_3d)
@@ -244,7 +275,84 @@ def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, ver
     return df1, df2, df3, df4
 
 
-def get_eyestate_result(scores, files, open_thres, valid_thres, error_name="eye_error.xlsx"):
+def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='human_test', score_thres=0.95, version=''):
+    results = []
+    df_file = pd.read_csv(files, header=None, names=['filename'])
+    df_file['path'] = df_file['filename'].apply(lambda x: os.path.dirname(x.split()[-1]))
+    df_file.drop(labels=['filename'], axis=1, inplace=True)
+    df_file.drop_duplicates(inplace=True)
+
+    np_file = np.array(df_file['path'])
+    df_file = pd.DataFrame(data=np_file, columns=['path'], index=np.arange(len(df_file)))
+
+    # 重新生成labels
+    labels = get_labels_for_pc(np_file, flag=flag)
+    df_label = pd.DataFrame(data=labels, columns=['label'])
+
+    final_scores = []  # 多帧逻辑时，每一个序列保存一个最低的score
+    sequence = []  # 处理每次解锁的一个序列的score
+    with open(scores, 'r') as csv_f:
+        content = csv.reader(csv_f)
+        for item in content:
+            if item:
+                sequence.append(item[0])
+            else:
+                final_scores.append(min(list(map(lambda x: float(x) if x else 100, sequence))))
+                sequence = []
+        if sequence:
+            final_scores.append(min(list(map(lambda x: float(x) if x else 100, sequence))))
+
+    rows = len(final_scores)        # 解锁次数
+    df_score = pd.DataFrame(final_scores, columns=['score'])
+    print(df_score.shape)
+
+    df = pd.concat([df_score, df_file, df_label], axis=1)
+
+    for name, group in df.groupby('path'):
+        # print(group)
+        result = get_live_frr_far(group, 'score', score_thres, 'label', column_filename='path')
+        results.append([name, *result[:9]])
+
+    for name, group in df.groupby('label'):
+        result = get_live_frr_far(group, 'score', score_thres, 'label', column_filename='path')
+        results.append([name, *result[:9]])
+
+   # 真人识别为假人
+    df1 = df.loc[((df['score'] > score_thres) & (df['label'] == 0))]
+    # 假人识别为真人
+    df2 = df.loc[((df['score'] < score_thres) & (df['label'] == 1))]
+    result = get_live_frr_far(df, 'score', score_thres, 'label')
+    results.append(["All", *result[:9]])
+    writer = pd.ExcelWriter(error_name)
+    df1.to_excel(writer, sheet_name='真人识别为假人', index=False)
+    df2.to_excel(writer, sheet_name='假人识别为真人', index=False)
+
+    # print(results)
+    df3 = pd.DataFrame(results, columns=[
+        "类别", "far", "frr", "总数", "真人总数", "真人识别为假人", "假人总数",
+        "假人识别为真人", "未识别数", "未识别率"])
+    df3.to_excel(writer, sheet_name='分类统计', index=False)
+
+    results = []
+    values = [0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999]
+    for value in values:
+        result = get_live_frr_far(df, 'score', value, 'label')
+        results.append([value, *result])
+
+    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total",
+               "real_num", "frr_num", "photo_num", "far_num", "unknow", "unknow_rate",
+               'num_2d', 'far_number_2d', 'far2d',
+               'num_3d', 'far_number_3d', 'far3d',
+               'num_3d_high', 'far_number_3d_high', 'far3d_high',
+               'num_3d_low', 'far_number_3d_low', 'far3d_low']
+
+    df4 = pd.DataFrame(results, columns=columns)
+    df4.to_excel(writer, sheet_name='FAR_FRR', index=False)
+    writer.save()
+    return df1, df2, df3, df4
+
+
+def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error.xlsx"):
     df_score = pd.read_csv(scores, sep=' ', engine='c',
                      names=['left_score', 'left_valid', 'right_score', 'right_valid'])
     df_file = pd.read_csv(files, names=['filename'], dtype=np.str)
@@ -348,13 +456,11 @@ def get_verify_errors(df, real_photos, positive=0.7, negative=0.7):
         self_error = self[(self < positive) & (self > -1)]
         for item in self_error.index:
             self_errors.append((item, self_error[item]))
-        # print(self_error)
         others = row.drop(person, level=0)
         other_nums = other_nums + len(others)
         other_error = others[others >= negative]
         for item in other_error.index:
             other_errors.append([person, item[1], other_error.loc[item]])
-            # print(other_error)
 
     df_person_errors = pd.DataFrame(self_errors, columns=['filename', 'score'])
     df_other_errors = pd.DataFrame(other_errors, columns=['person', 'filename', 'score'])
@@ -457,4 +563,4 @@ def analysis_verify_result(all_result, list_id, ana_result_dir):
 
 
 if __name__ == "__main__":
-    get_eyestate_result(scores='output_eyestate.csv', files='image_list.txt', open_thres=9.5, valid_thres=9.5)
+    get_liveness_result_for_multi_frame('score_2.6.42.5-snpe.csv', 'files.txt', error_name='a.xlsx')
