@@ -14,6 +14,7 @@ import shutil
 import csv
 from pathlib import Path
 import functools
+import argparse
 
 import numpy as np
 import pandas as pd
@@ -321,7 +322,7 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
     df1 = df.loc[((df['score'] > score_thres) & (df['label'] == 0))]
     # 假人识别为真人
     df2 = df.loc[((df['score'] < score_thres) & (df['label'] == 1))]
-    result = get_live_frr_far(df, 'score', score_thres, 'label')
+    result = get_live_frr_far(df, 'score', score_thres, 'label', column_filename='path')
     results.append(["All", *result[:9]])
     writer = pd.ExcelWriter(error_name)
     df1.to_excel(writer, sheet_name='真人识别为假人', index=False)
@@ -336,7 +337,7 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
     results = []
     values = [0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999]
     for value in values:
-        result = get_live_frr_far(df, 'score', value, 'label')
+        result = get_live_frr_far(df, 'score', value, 'label', column_filename='path')
         results.append([value, *result])
 
     columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total",
@@ -563,4 +564,8 @@ def analysis_verify_result(all_result, list_id, ana_result_dir):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
+    parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
+    args = parser.parse_args()
     get_liveness_result_for_multi_frame('score_2.6.42.5-snpe.csv', 'files.txt', error_name='a.xlsx')
