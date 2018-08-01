@@ -189,7 +189,7 @@ def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
     num_3d_low = len(df.loc[df[column_filename].str.contains('/3D_Lowcost/')])
 
     # 真人识别为假人
-    frr_number = len(df.loc[((df[colomn1] > score) & (df[colomn2] == 0))])
+    frr_number = len(df.loc[((df[colomn1] > score) & (df[colomn2] == 0) & (df[colomn1] <= 1))])
     # 假人识别为真人
     far_number = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1))])
     # 2d假人识别为真人
@@ -241,15 +241,18 @@ def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, ver
         result = get_live_frr_far(group, 'score', score_thres, 'label')
         results.append([name, *result[:9]])
 
-        # 真人识别为假人
+    # 真人识别为假人
     df1 = df.loc[((df['score'] > score_thres) & (df['label'] == 0))]
     # 假人识别为真人
-    df2 = df.loc[((df['score'] < score_thres) & (df['label'] == 1))]
+    df2 = df.loc[((df['score'] > 0) & (df['score'] < score_thres) & (df['label'] == 1))]
+    # 分数小于0的图片
+    df_except = df.loc[df['score'] < 0]
     result = get_live_frr_far(df, 'score', score_thres, 'label')
     results.append(["All", *result[:9]])
     writer = pd.ExcelWriter(error_name)
     df1.to_excel(writer, sheet_name='真人识别为假人', index=False)
     df2.to_excel(writer, sheet_name='假人识别为真人', index=False)
+    df_except.to_excel(writer, sheet_name="分数异常", index=False)
 
     # print(results)
     df3 = pd.DataFrame(results, columns=[
@@ -296,12 +299,14 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
         content = csv.reader(csv_f)
         for item in content:
             if item:
+                if float(item[0]) < 0:
+                    item[0] = 100
                 sequence.append(item[0])
             else:
-                final_scores.append(min(list(map(lambda x: float(x) if x else 100, sequence))))
+                final_scores.append(min(list(map(lambda x: float(x), sequence))))
                 sequence = []
         if sequence:
-            final_scores.append(min(list(map(lambda x: float(x) if x else 100, sequence))))
+            final_scores.append(min(list(map(lambda x: float(x), sequence))))
 
     rows = len(final_scores)        # 解锁次数
     df_score = pd.DataFrame(final_scores, columns=['score'])
@@ -568,4 +573,4 @@ if __name__ == "__main__":
     parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
     parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
     args = parser.parse_args()
-    get_liveness_result_for_multi_frame('score_2.6.42.5-snpe.csv', 'files.txt', error_name='a.xlsx')
+    get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
