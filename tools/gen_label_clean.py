@@ -85,9 +85,10 @@ if __name__ == "__main__":
                         help='数据集目录')
     parser.add_argument('-l', '--label', action='store_true', default=False, help="生成的label用于清洗还是跑批处理, 默认跑pc批处理")
     parser.add_argument('-t', '--type', action='store', default='jpg', help='文件类型')
+    parser.add_argument('-a', '--is_abs', action='store', default=False, help="生成的文件列表是否为绝对路径")
     args = parser.parse_args()
 
-    files = get_files(args.input_dir, file_type=args.type, is_abs=True)
+    files = get_files(args.input_dir, file_type=args.type, is_abs=args.is_abs)
     if args.label:
         labels = get_labels_for_clean(files)
         list2file(labels, 'db_testset.label', first_row=str(len(labels)))
