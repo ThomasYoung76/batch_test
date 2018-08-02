@@ -9,14 +9,6 @@
 				"verify": "models/verify/M_Verify_MimicG2Pruned_Common_3.67.0.model"
 			}
 		}, {
-			"id": 0,
-			"test_type": "verify",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/verify/base_China500",
-			"ext": "jpg",
-			"model": {
-				"verify": "models/verify/M_Verify_Mobilenetv2Pruned_Common_3.74.0.model"
-			}
-		}, {
 			"id": 1,
 			"test_type": "verify",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/verify/india32_cleaned",
@@ -24,8 +16,32 @@
 			"model": {
 				"verify": "models/verify/M_Verify_MimicG2Pruned_Common_3.67.0.model"
 			}
+		},{
+			"id": 2,
+			"test_type": "verify",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/verify/india32_cleaned",
+			"ext": "yuv",
+			"model": {
+				"verify": "models/verify/M_Verify_MimicG2Pruned_Common_3.67.0.model"
+			}
 		}, {
-			"id": 1,
+			"id": 3,
+			"test_type": "verify",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/verify/base_China500",
+			"ext": "jpg",
+			"model": {
+				"verify": "models/verify/M_Verify_Mobilenetv2Pruned_Common_3.74.0.model"
+			}
+		}, {
+			"id": 4,
+			"test_type": "verify",
+			"data_path": "/mnt/lustre/yangshifu/testset/2d/verify/india32_cleaned",
+			"ext": "yuv",
+			"model": {
+				"verify": "models/verify/M_Verify_Mobilenetv2Pruned_Common_3.74.0.model"
+			}
+		}, {
+			"id": 5,
 			"test_type": "verify",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/verify/india32_cleaned",
 			"ext": "yuv",

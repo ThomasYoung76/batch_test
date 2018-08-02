@@ -5,31 +5,47 @@
 			"test_type": "liveness",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.41",
 			"ext": "yuv",
-			"time": ""
+			"time": "",
+			"model": {
+					"liveness": "models/2d_models/liveness/M_Liveness_Antispoofing_General_7.29.1.model"
+			},
+			"force_resize_max": 480
 		}, {
 			"id": 1,
 			"test_type": "liveness",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.42",
 			"ext": "yuv",
-			"time": ""
+			"model": {
+					"liveness": "models/2d_models/liveness/M_Liveness_Antispoofing_General_7.29.1.model"
+			},
+			"force_resize_max": 480
 		}, {
 			"id": 2,
 			"test_type": "liveness",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.43",
 			"ext": "yuv",
-			"time": ""
+			"model": {
+					"liveness": "models/2d_models/liveness/M_Liveness_Antispoofing_General_7.29.1.model"
+			},
+			"force_resize_max": 480
 		}, {
 			"id": 3,
 			"test_type": "liveness",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.50",
 			"ext": "yuv",
-			"time": ""
+			"model": {
+					"liveness": "models/2d_models/liveness/M_Liveness_Antispoofing_General_7.29.1.model"
+			},
+			"force_resize_max": 480
 		}, {
 			"id": 4,
 			"test_type": "liveness",
 			"data_path": "/mnt/lustre/yangshifu/testset/2d/liveness/v2.6.55",
 			"ext": "yuv",
-			"time": ""
+			"model": {
+					"liveness": "models/2d_models/liveness/M_Liveness_Antispoofing_General_7.29.1.model"
+			},
+			"force_resize_max": 480
 		}
 	]
 }

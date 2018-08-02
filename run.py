@@ -248,7 +248,7 @@ def optimize_result(raw_result, id_=None):
     int_id = info.get('id', None)
     id_info = '_id{}'.format(int_id) if int_id is not None else ''
     result_dir = "{0}{1}result{1}{2}{3}_{4}_{5}{6}".format(
-        PATH_BASE, os.sep, test_type, id_info, now, version, resize_info)
+        PATH_BASE, os.sep, test_type, now, id_info, version, resize_info)
     check_directory(result_dir)
     print("See result in {}".format(result_dir))
     new_result = '{}{}score_{}{}'.format(result_dir, os.sep, data_version, Path(raw_result).suffix)
