@@ -13,6 +13,7 @@ import shutil
 import json
 import subprocess
 from pathlib import Path
+from pprint import pprint
 
 from s_config import *
 from s_common import *
@@ -228,6 +229,10 @@ def execute(command):
     end = datetime.datetime.now()
     gap = (end - datetime.datetime.strptime(now, '%Y%m%d_%H%M%S')).total_seconds()
     print("Success. elapse time: {}s".format(gap))
+    with open('{}{}{}.log'.format(PATH_BASE, os.sep, test_type), 'r') as f:
+        log_content = f.readlines(1024)
+    if len(log_content) > 1:
+        pprint("Warining: see {}.log: \n{}".format(test_type, log_content))
     time.sleep(2)
     return result
 
@@ -247,7 +252,7 @@ def optimize_result(raw_result, id_=None):
     resize_info = '_resize{}'.format(size) if size else ''
     int_id = info.get('id', None)
     id_info = '_id{}'.format(int_id) if int_id is not None else ''
-    result_dir = "{0}{1}result{1}{2}{3}_{4}_{5}{6}".format(
+    result_dir = "{0}{1}result{1}{2}_{3}{4}_{5}{6}".format(
         PATH_BASE, os.sep, test_type, now, id_info, version, resize_info)
     check_directory(result_dir)
     print("See result in {}".format(result_dir))
