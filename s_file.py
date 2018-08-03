@@ -370,17 +370,12 @@ def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error
 
     close_error = df2[df2['filename'].str.contains('/close') & ((df2['left_score'] > open_thres) | (df2['right_score'] > open_thres))]
     open_error = df2[df2['filename'].str.contains('/open') & (df2['left_score'] < open_thres) & (df2['right_score'] < open_thres)]
-    invalid_error = df2[
-        df2['name'].str.contains('/invalid/') & ((df2['left_valid'] > valid_thres) | (df2['right_valid'] > valid_thres))]
-    valid_error = df2[df2['name'].str.contains('/valid/') & (df2['left_valid'] < valid_thres) & (df2['right_valid'] < valid_thres)]
     writer = pd.ExcelWriter(error_name)
     df.to_excel(writer, sheet_name='图片汇总', index=False)
     df_unknow.to_excel(writer, sheet_name='未认识人脸', index=False)
     df_error.to_excel(writer, sheet_name='图片格式错误', index=False)
     close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
     open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
-    invalid_error.to_excel(writer, sheet_name="无效识别为有效", index=False)
-    valid_error.to_excel(writer, sheet_name="有效识别为无效", index=False)
     writer.save()
 
 

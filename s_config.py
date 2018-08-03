@@ -9,10 +9,20 @@ gt_ir = "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo-detect_ir_test_new
 types = ('detect', 'liveness', 'verify', 'eye')    # 支持测试类型
 images = ('png', 'jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
 
+# 睁眼闭眼标识
+eye_open = ['03/', '04/', '05/', '06/', '07/', '09/', '11/', '13/', '14/', '15/', '16/', '17/', '18/', '19/', '20/',
+            '21/', '22/', '23/', '24/', '25/', '27/', '29/', '31/', '33/', '38/', '39/', '40/', '41/', '42/', '43/',
+            '44/', '45/', '46/', '47/', '48/', '49/', '50/', '51/', '52/', '53/', '54/', '55/', '56/', '57/', '58/',
+            '59/', '60/', '61/', '62/', '63/', '64/', '65/', '66/', '67/', '68/', '69/', '70/', '71/', '72/']
+
+eye_close = ['01/', '02/', '08/', '10/', '12/', '26/', '28/', '30/', '32/', '34/', '35/', '36/', '37/', '73/', '74/',
+             '75/', '76/']
+
+
 # 基本配置信息
 is_wait_env_free = True        # 其他测试正在进行时，是否等到环境空闲时执行，默认True，一直等待
 is_wait_finish = True       # 是否等待脚本执行完成
-liveness_flag = 'human_test/'  # 图片真人标识, 如有多个目录为真人，则用列表或元祖来设置flag，如北京数据：['Enroll', 'Real']
+liveness_flag = 'human_test/'  # 图片真人标识或者睁闭眼的睁眼标识, 如有多个目录为真人，则用列表或元祖来设置flag，如北京数据：['Enroll', 'Real']
 
 # 阈值配置
 liveness_score_thres = 0.95     # 活体阈值
@@ -37,3 +47,4 @@ cmd = {
     "verify": "nohup ./run -r output/i_enroll.txt output/i_real.txt > verify.log 2>&1 &",
     "eyestate": "nohup ./run -e output/files.txt > eyestate.log 2>&1 &"
 }
+
