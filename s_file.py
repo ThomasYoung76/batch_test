@@ -315,7 +315,6 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
     df = pd.concat([df_score, df_file, df_label], axis=1)
 
     for name, group in df.groupby('path'):
-        # print(group)
         result = get_live_frr_far(group, 'score', score_thres, 'label', column_filename='path')
         results.append([name, *result[:9]])
 
@@ -355,7 +354,6 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
     df4 = pd.DataFrame(results, columns=columns)
     df4.to_excel(writer, sheet_name='FAR_FRR', index=False)
     writer.save()
-    return df1, df2, df3, df4
 
 
 def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error.xlsx"):
@@ -376,6 +374,94 @@ def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error
     df_error.to_excel(writer, sheet_name='图片格式错误', index=False)
     close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
     open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
+    writer.save()
+
+
+def get_eye_result_for_multi_frame(scores, files, open_flag, close_flag, error_name, open_thres, valid_thres, version=''):
+    results = []
+    df_file = pd.read_csv(files, header=None, names=['filename'])
+    df_file['path'] = df_file['filename'].apply(lambda x: os.path.dirname(x.split()[-1]))
+    df_file.drop(labels=['filename'], axis=1, inplace=True)
+    df_file.drop_duplicates(inplace=True)
+
+    np_file = np.array(df_file['path'])
+    df_file = pd.DataFrame(data=np_file, columns=['path'], index=np.arange(len(df_file)))
+
+    # 重新生成labels
+    labels = get_labels_for_pc(np_file, flag=open_flag)
+    df_label = pd.DataFrame(data=labels, columns=['label'])
+
+    final_scores = []  # 多帧逻辑时，活体每一个序列保存一个最低的score，睁闭眼则保存睁眼的score或最后一个score
+    sequence = []  # 处理每次解锁的一个序列的score
+    with open(scores, 'r') as csv_f:
+        content = csv.reader(csv_f)
+        for item in content:
+            if item:
+                sequence.append(item[0].split(' ')[:-1])
+            else:
+                # 分数的最后两列只要有1个值为1，即判断为睁眼，放入final_scores，否则将序列最后一个分数放入final_scores
+                break_flag = False
+                for seq in sequence:
+                    if seq[-1] == 1 or seq[-2] == 1:
+                        final_scores.append(seq)
+                        break_flag = True
+                        break
+                if not break_flag:
+                    final_scores.append(sequence[-1])
+                sequence = []
+        # 处理最后一个sequence
+        if sequence:
+            break_flag = False
+            for seq in sequence:
+                if seq[-1] == 1 or seq[-2] == 1:
+                    final_scores.append(seq)
+                    break_flag = True
+                    break
+            if not break_flag:
+                final_scores.append(sequence[-1])
+
+    # 转换str为float
+    scores = []
+    for score in final_scores:
+        scores.append(list(map(lambda x: float(x), score)))
+    final_scores = scores
+
+    rows = len(final_scores)  # 解锁次数
+    df_score = pd.DataFrame(final_scores, columns=['left_score', 'left_valid', 'right_score', 'right_valid',
+                                                   'left_open', 'right_open'])
+
+    df = pd.concat([df_score, df_file, df_label], axis=1)
+
+    # df_unknow = df[(df['left_open'] == -1) & (df['right_open'] == -1)]
+    # df_error = df[df['left_score'] == -2]
+
+    # df2 = df[(df['left_open'] > -1) & (df['right_open'] > -1)]
+    df2 = df
+    close_error = pd.DataFrame(columns=df.columns)
+    if isinstance(close_flag, (list, tuple)):
+        for close in close_flag:
+            df_error = df2[df2['path'].str.contains(close) & ((df2['left_open'] == 1) | (df2['right_open'] == 1))]
+            close_error = pd.concat([close_error, df_error])
+    open_error = pd.DataFrame(columns=df.columns)
+    if isinstance(open_flag, (list, tuple)):
+        # bug, for循环把open_error重置了
+        for o in open_flag:
+            df_error = df2[df2['path'].str.contains(o) & (df2['left_open'] != 1) & (df2['right_open'] != 1)]
+            open_error = pd.concat([open_error, df_error], axis=0)
+
+    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total",
+               "far_num", "frr_num"]
+
+    far_frr = [[open_thres, len(close_error) / rows, len(open_error) / rows, rows, len(close_error), len(open_error)]]
+    df_far_frr = pd.DataFrame(far_frr, columns=columns)
+
+    writer = pd.ExcelWriter(error_name)
+    df.to_excel(writer, sheet_name='图片汇总', index=False)
+    # df_unknow.to_excel(writer, sheet_name='未认识人脸', index=False)
+    # df_error.to_excel(writer, sheet_name='图片格式错误', index=False)
+    close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
+    open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
+    df_far_frr.to_excel(writer, sheet_name='far-frr', index=False)
     writer.save()
 
 
@@ -564,8 +650,12 @@ def analysis_verify_result(all_result, list_id, ana_result_dir):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
-    parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
-    args = parser.parse_args()
-    get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
+    # parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
+    # parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
+    # parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
+    # args = parser.parse_args()
+    # get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
+    from s_config import eye_open, eye_close
+    get_eye_result_for_multi_frame('score_1.4.4_ppl.csv', files='files144.txt', open_flag=eye_open,
+                                   close_flag=eye_close, error_name='2.7.1.xlsx', open_thres=9.5, valid_thres=9.5,
+                                   version='2.7.1')

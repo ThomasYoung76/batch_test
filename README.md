@@ -51,6 +51,7 @@
         "save_aligned_img": false,
         "benchmark": true,      # 设置为False，可屏蔽接口的打印信息
         "use_snpe_gpu": true
+        "liveness_use_sequence": true   # 对于多帧策略活体模型，跑多帧活体时设置True（文件列表按时序空行分开），跑单帧数据时，设置为False，文件列表不需要空行分开
     }
 
 ### 第三步，根据实际情况修改s_config.py

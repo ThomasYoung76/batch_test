@@ -185,7 +185,7 @@ def prepare_data():
     if not Path(output).exists():
         os.makedirs(output)
 
-    if test_type in ['liveness', 'eye']:
+    if test_type in ['liveness', 'eyestate']:
         build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag, file_name=file_name,
                              label_name=label_name, filter_=section, is_multi_frame=is_use_sequence,
                              is_line_sep=is_line_sep)
@@ -280,15 +280,24 @@ def optimize_result(raw_result, id_=None):
     roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
         shutil.copy2(file_name, result_dir)
-        get_liveness_result(new_result, file_name, label_name, score_thres=liveness_score_thres,
-                            error_name=final_result, version=version)
+        if is_use_sequence:
+            get_liveness_result_for_multi_frame(scores=raw_result, files=file_name, error_name=final_result,
+                                                flag=liveness_flag, score_thres=liveness_score_thres, version=version)
+        else:
+            get_liveness_result(new_result, file_name, label_name, score_thres=liveness_score_thres,
+                                error_name=final_result, version=version)
 
         # 写roc
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
 
-    if test_type == 'eye':
-        get_eye_result(scores=raw_result, files=file_name, error_name=final_result,
-                       open_thres=eye_open_thres, valid_thres=eye_valid_thres)
+    if test_type == 'eyestate':
+        if is_use_sequence:
+            get_eye_result_for_multi_frame(scores=raw_result, files=file_name, open_flag=eye_open, close_flag=eye_close,
+                                       error_name=final_result, open_thres=eye_open_thres, valid_thres=eye_valid_thres,
+                                       version=version)
+        else:
+            get_eye_result(scores=raw_result, files=file_name, error_name=final_result,
+                           open_thres=eye_open_thres, valid_thres=eye_valid_thres)
 
     if test_type == 'verify':
         shutil.copy2(i_real, result_dir)
