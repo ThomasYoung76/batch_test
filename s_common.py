@@ -10,6 +10,9 @@ import subprocess
 import time
 
 
+import pexpect
+
+
 def str_to_time(str_execute_time):
     """
     format "%H:%M" to datetime
@@ -48,3 +51,11 @@ def wait_crontab(plan_time):
         execute_time = str_to_time(plan_time)
         while datetime.datetime.now() < execute_time:
             time.sleep(1)
+
+
+def transfer_data(remote_ip, test_type, output_dir):
+    child = pexpect.spawn("lftp andrew:654321_@{}".format(remote_ip))
+    child.expect("lftp *")
+    child.sendline("cd ~/code/yangshifu/result/{}".format(test_type))
+    child.expect("yangshifu".format(remote_ip))
+    child.sendline("mirror -R {}".format(output_dir))

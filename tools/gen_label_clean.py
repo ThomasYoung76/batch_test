@@ -50,12 +50,13 @@ def get_files(src, file_type="jpg", is_abs=False):
     return files
 
 
-def get_labels_for_clean(files):
+def get_labels_for_clean(files, level=1):
     """获取用于清洗的labels，适用于工具
     http://gitlab.bj.sensetime.com/face-recognition/testsets_autoclean"""
     labels = []
     for f in files:
-        labels.append(f.split(os.sep)[0])
+        f_dir = f.split('/')
+        labels.append('/'.join(f_dir[:level]))
     return labels
 
 
@@ -78,7 +79,9 @@ def get_labels_for_pc(files, flag='hack'):
 if __name__ == "__main__":
     desc = """生成数据集的db_testset.txt和db_testset.label，
     用于工具（http://gitlab.bj.sensetime.com/face-recognition/testsets_autoclean）
-    来清洗数据集"""
+    来清洗数据集
+    eg:
+    python3 gen_label_clean.py -i base_China500 -l -t jpg"""
     parser = argparse.ArgumentParser(description=desc,
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-i', '--input_dir', action='store', default=input_dir,
