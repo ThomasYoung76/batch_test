@@ -6,6 +6,7 @@ Created on 2018/7/7
 @mail: yangshifu@sensetime.com
 """
 import os
+import re
 import argparse
 from pathlib import Path
 
@@ -19,24 +20,14 @@ def list2file(result, file_name, first_row=None):
         for row in result:
             f.write('{}\n'.format(row))
 
-
-# def get_label_and_file_for_clean(src, file_type="jpg"):
-#     p = Path(src)
-#     files = []
-#     labels = []
-#     for file_name in p.rglob("*.{}".format(file_type)):
-#         file_name = file_name.relative_to(src)
-#         files.append(str(file_name))
-#         labels.append(str(file_name).split(os.sep)[0])
-#     return files, labels
-
-
-def get_files(src, file_type="jpg", is_abs=False):
+def get_files(src, file_type="jpg", is_abs=False, filter_=''):
     """
     获取文件列表
     :param src: 数据集目录
     :param file_type: 文件类型
     :param is_abs: 是否获取文件的绝对路径
+    :param filter_: 路径过滤的正则表达式
+    :param is_multi_frame: 测试集是否采用多帧策略
     :return: 文件路径组成的列表
     """
     p = Path(src)
@@ -46,7 +37,31 @@ def get_files(src, file_type="jpg", is_abs=False):
             file_name = file_name.relative_to(src)
         else:
             file_name = file_name.absolute()
-        files.append(str(file_name))
+
+        # 增加判断文件大小是否为0的逻辑
+        if not os.path.getsize(file_name):
+            print("Warning: file's size is zero. file path: {}".format(file_name))
+            continue
+
+        # 按filter_过滤
+        if filter_:
+            if ':' in filter_:
+                filters = filter_.split(':')
+                new_filter = r'|'.join(filters)
+                ret = re.search(new_filter, str(file_name))
+                if not ret:
+                    continue
+                else:
+                    files.append(str(file_name))
+            else:
+                ret = re.search(filter_, str(file_name))
+                if ret:
+                    files.append(str(file_name))
+                else:
+                    continue
+        else:
+            files.append(str(file_name))
+
     return files
 
 
@@ -89,11 +104,13 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--label', action='store_true', default=False, help="生成的label用于清洗还是跑批处理, 默认跑pc批处理")
     parser.add_argument('-t', '--type', action='store', default='jpg', help='文件类型')
     parser.add_argument('-a', '--is_abs', action='store', default=False, help="生成的文件列表是否为绝对路径")
+    parser.add_argument('-f', '--filter_word', action='store', default='', help="过滤表达式")
+    parser.add_argument('-v', '--level', action='store', type=int, help="label中目录的层级")
     args = parser.parse_args()
 
-    files = get_files(args.input_dir, file_type=args.type, is_abs=args.is_abs)
+    files = get_files(args.input_dir, file_type=args.type, is_abs=args.is_abs, filter_=args.filter_word)
     if args.label:
-        labels = get_labels_for_clean(files)
+        labels = get_labels_for_clean(files, level=args.level)
         list2file(labels, 'db_testset.label', first_row=str(len(labels)))
     else:
         labels = get_labels_for_pc(files, 'hack')
