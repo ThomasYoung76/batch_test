@@ -38,11 +38,6 @@ def get_files(src, file_type="jpg", is_abs=False, filter_=''):
         else:
             file_name = file_name.absolute()
 
-        # 增加判断文件大小是否为0的逻辑
-        if not os.path.getsize(file_name):
-            print("Warning: file's size is zero. file path: {}".format(file_name))
-            continue
-
         # 按filter_过滤
         if filter_:
             if ':' in filter_:
