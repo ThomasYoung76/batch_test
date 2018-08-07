@@ -28,7 +28,7 @@ for f in data.rglob('*Enroll'):
         print("Warning : count of {} is 0. requires 1 to 5".format(str(f)))
     elif count > 5:
         print("Warning : count of {} is more than 5. now delete to 5".format(str(f)))
-        for fa in list(list(files)[5:]):
+        for fa in list(files)[5:]:
             os.remove(str(fa))
             # 删除同名文件的jpg
             try:
