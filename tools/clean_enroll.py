@@ -22,17 +22,16 @@ data = Path(args.dataset)
 for f in data.rglob('*Enroll'):
     files = f.glob('*.yuv')
     count = len(list(files))
+    person = f.parent.name
+    print("Person: {}. count: {}".format(person, count))
     if count == 0:
-        print("warning : count of {} is 0. requires 1 to 5".format(str(f)))
+        print("Warning : count of {} is 0. requires 1 to 5".format(str(f)))
     elif count > 5:
-        print("warning : count of {} is more than 5. now delete to 5".format(str(f)))
-        for fa in list(files[5:]):
+        print("Warning : count of {} is more than 5. now delete to 5".format(str(f)))
+        for fa in list(list(files)[5:]):
             os.remove(str(fa))
             # 删除同名文件的jpg
             try:
                 os.remove(str(fa).strip('.yuv') + '.jpg')
             except:
                 continue
-    else:
-        person = f.parent.name
-        print("Person: {}. count: {}".format(person, count))
