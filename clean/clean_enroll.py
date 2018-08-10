@@ -38,12 +38,18 @@ for f in data.rglob('*Enroll'):
                 continue
 
 
+dict_real = {}
 for f in data.rglob('*Real'):
     # 假人
     files_real = list(f.glob('*.yuv'))
     count_real = len(files_real)
     # 真人
-    files_hack = list(Path(str(f).replace('Real', 'hack')).glob('*.yuv'))
+    files_hack = list(Path(str(f).replace('Real', 'Hack')).glob('*.yuv'))
     count_hack = len(files_hack)
     person = f.parent.name
+    dict_real[person] = count_real
     print("Person: {}. count real: {}. count hack: {}".format(person, count_real, count_hack))
+
+print("--------------------------------------------")
+print(dict_real.values())
+
