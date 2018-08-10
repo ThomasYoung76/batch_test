@@ -150,10 +150,10 @@ def set_config_by_id(id_=None):
     # 获取版本号
     try:
         with open(PATH_CONFIG) as f:
-            configs = f.read()
+            configs = json.load(f)
     except FileNotFoundError as e:
         sys.exit(e)
-    search = re.search('{0}.*?(\d+.\d+.\d+)'.format(test_type), configs)
+    search = re.search('(\d+.\d+.\d+).model', configs[test_type]["models"])
     if not search:
         sys.exit("Error: Can not find version!")
     global version
@@ -164,13 +164,21 @@ def set_config_by_id(id_=None):
 def check_config():
     # 检查配置文件，确认模型都存在
     d = json.load(open(PATH_CONFIG))
-    for item in d['model']:
-        model = d['model'][item]
-        if not Path(os.path.join(PATH_BASE, model)).exists():
-            print("Error. model: {} not exist".format(model))
+    align = d['align'].get('model')
+    detect = d['detect'].get('model')
+    t_type = d[test_type].get('model')
+    for t in set([align, detect, t_type]):
+        if not Path(os.path.join(PATH_BASE, align)).exists():
+            print("Error. align model: {} not exist".format(align))
             sys.exit(0)
+
+    # for item in d['model']:
+    #     model = d['model'][item]
+    #     if not Path(os.path.join(PATH_BASE, model)).exists():
+    #         print("Error. model: {} not exist".format(model))
+    #         sys.exit(0)
     # 记录resize信息
-    info['resize'] = d.get('force_resize_max')
+    info['resize'] = d['detect'].get('force_resize_max')
     # 检查配置信息是否正确，如jpg的width和hight必须为-1，2d图片的gray为false，读取图片的长宽高是否匹配等
     pass
 
