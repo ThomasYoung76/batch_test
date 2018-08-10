@@ -13,12 +13,12 @@ import argparse
 desc = """
 数据集清洗后，通过清洗后的文件列表获得清洗后的测试集
 注：清洗的文件列表路径必须是绝对路径
-python3 copy_from_clean_ysf.py -c dataclean#RGB_foreigner_250_clean#0.55_0.7#/db_aligned.txt -t RGB_foreigner_250_clean
+python3 copy_from_clean_ysf.py -c dataclean#RGB_China_124_clean#0.45_0.7#/db_aligned.txt -t RGB_China_124_clean -k
 """
 parser = argparse.ArgumentParser(description='', formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='clean_file', action='store', help='清洗文件所在路径')
 parser.add_argument('-t', dest='testset', action='store', help="数据集目录名")
-parser.add_argument('-k', dest='is_hack', action='store', default=False, help='是否需要拷贝假人Hack目录')
+parser.add_argument('-k', dest='is_hack', action='store_true', default=False, help='是否需要拷贝假人Hack目录')
 args = parser.parse_args()
 
 hack_flag = 'Hack'

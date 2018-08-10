@@ -91,7 +91,7 @@ if __name__ == "__main__":
     用于工具（http://gitlab.bj.sensetime.com/face-recognition/testsets_autoclean）
     来清洗数据集
     eg:
-    python3 gen_label_clean.py -i base_China500 -l -t jpg"""
+    python3 gen_label_clean.py -i base_China500 -l -t jpg -v"""
     parser = argparse.ArgumentParser(description=desc,
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-i', '--input_dir', action='store', default=input_dir,
@@ -112,4 +112,3 @@ if __name__ == "__main__":
         list2file(labels, 'db_testset.label')
 
     list2file(files, 'db_testset.txt')
-
