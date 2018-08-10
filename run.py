@@ -153,7 +153,7 @@ def set_config_by_id(id_=None):
             configs = json.load(f)
     except FileNotFoundError as e:
         sys.exit(e)
-    search = re.search('(\d+.\d+.\d+).model', configs[test_type]["models"])
+    search = re.search('(\d+.\d+.\d+).model', configs[test_type]["model"])
     if not search:
         sys.exit("Error: Can not find version!")
     global version
@@ -167,8 +167,8 @@ def check_config():
     align = d['align'].get('model')
     detect = d['detect'].get('model')
     t_type = d[test_type].get('model')
-    for t in set([align, detect, t_type]):
-        if not Path(os.path.join(PATH_BASE, align)).exists():
+    for t in [align, detect, t_type]:
+        if not Path(os.path.join(PATH_BASE, t)).exists():
             print("Error. align model: {} not exist".format(align))
             sys.exit(0)
 
