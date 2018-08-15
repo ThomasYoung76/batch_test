@@ -374,9 +374,13 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
 
     df2 = df[df['left_score'] > -1]
 
-    close_error = df2[df2['filename'].str.contains(close_flag) & ((df2['left_score'] > open_thres) | (df2['right_score'] > open_thres))]
-    open_error = df2[df2['filename'].str.contains(open_flag) & (df2['left_score'] < open_thres) & (df2['right_score'] < open_thres)]
-
+    close_error = df2[df2['filename'].str.contains(close_flag) &
+                      ((df2['left_score'] > open_thres) & (df2['left_valid'] > valid_thres)) |
+                      ((df2['right_score'] > open_thres) & (df2['right_valid'] > valid_thres))]
+    open_error = df2[df2['filename'].str.contains(open_flag) &
+                     ((df2['left_score'] < open_thres) | (df2['left_valid'] < valid_thres)) &
+                     (df2['right_score'] < open_thres) | (df2['right_valid'] < valid_thres)]
+    
     # 计算frr和far
     far_frr = [[open_thres, len(close_error) / len(df2), len(open_error) / len(df2), len(df), df_undetect,
                 len(close_error), len(open_error)]]
@@ -392,7 +396,6 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
     close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
     open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
     df_far_frr.to_excel(writer, sheet_name='far-frr', index=False)
-
     writer.save()
 
 
