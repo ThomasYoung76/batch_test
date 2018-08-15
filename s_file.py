@@ -356,7 +356,7 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
     writer.save()
 
 
-def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error.xlsx"):
+def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', close_flag='/close', error_name="eye_error.xlsx", version=''):
     """
     scores文件的分数：左眼open，左眼valid，右眼open，右眼valid，左眼状态，右眼状态（0是闭眼）。后两个仅在use_sequence时输出。
     :param scores:
@@ -370,19 +370,29 @@ def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error
                      names=['left_score', 'left_valid', 'right_score', 'right_valid'])
     df_file = pd.read_csv(files, names=['filename'], dtype=np.str)
     df = pd.concat([df_file, df_score], axis=1)
-    df_unknow = df[df['left_score'] == -1]
-    df_error = df[df['left_score'] == -2]
+    df_undetect = df[df['left_score'] == -1]
 
     df2 = df[df['left_score'] > -1]
 
-    close_error = df2[df2['filename'].str.contains('/close') & ((df2['left_score'] > open_thres) | (df2['right_score'] > open_thres))]
-    open_error = df2[df2['filename'].str.contains('/open') & (df2['left_score'] < open_thres) & (df2['right_score'] < open_thres)]
+    close_error = df2[df2['filename'].str.contains(close_flag) & ((df2['left_score'] > open_thres) | (df2['right_score'] > open_thres))]
+    open_error = df2[df2['filename'].str.contains(open_flag) & (df2['left_score'] < open_thres) & (df2['right_score'] < open_thres)]
+
+    # 计算frr和far
+    far_frr = [[open_thres, len(close_error) / len(df2), len(open_error) / len(df2), len(df), df_undetect,
+                len(close_error), len(open_error)]]
+
+    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total", "undetect",
+               "far_num", "frr_num"]
+
+    df_far_frr = pd.DataFrame(far_frr, columns=columns)
+
     writer = pd.ExcelWriter(error_name)
     df.to_excel(writer, sheet_name='图片汇总', index=False)
-    df_unknow.to_excel(writer, sheet_name='未认识人脸', index=False)
-    df_error.to_excel(writer, sheet_name='图片格式错误', index=False)
+    df_undetect.to_excel(writer, sheet_name='未检测到人脸', index=False)
     close_error.to_excel(writer, sheet_name='闭眼识别为睁眼', index=False)
     open_error.to_excel(writer, sheet_name='睁眼识别为闭眼', index=False)
+    df_far_frr.to_excel(writer, sheet_name='far-frr', index=False)
+
     writer.save()
 
 

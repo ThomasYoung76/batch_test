@@ -305,7 +305,8 @@ def optimize_result(raw_result, id_=None):
                                        version=version)
         else:
             get_eye_result(scores=raw_result, files=file_name, error_name=final_result,
-                           open_thres=eye_open_thres, valid_thres=eye_valid_thres)
+                           open_thres=eye_open_thres, valid_thres=eye_valid_thres,
+                           open_flag=eye_open, close_flag=eye_close, version=version)
 
     if test_type == 'verify':
         shutil.copy2(i_real, result_dir)
