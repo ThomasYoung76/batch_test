@@ -6,7 +6,7 @@ Author:
 
 Modified:
     liqiming <liqiming@sensetime.com>
-
+    yangshifu <yangshifu@sensetime.com>
 Usage:
     python <scripts-name> --help
 
@@ -66,7 +66,8 @@ def process(args, yuv_list):
     fail = 0
     for file in yuv_list:
         count += 1
-        image_path = args.files_path + file.strip()
+        # image_path = args.files_path + file.strip()
+        image_path = os.path.dirname(file) + os.sep + os.path.basename(file).strip()
         print(image_path)
         try:
             img = cvt_yuv_nv21_to_rgb(args, image_path)
@@ -87,8 +88,10 @@ def getYuvFileList(filesPath):
     all_filesList = []
     yuv_filesList = []
     for (dirpath, dirnames, filenames) in os.walk(filesPath):
-        all_filesList.extend(filenames)
-    print(all_filesList)
+        for f in filenames:
+            file_path = os.path.join(dirpath, f)
+            all_filesList.append(file_path)
+        # all_filesList.extend(filenames)
     for file in all_filesList:
         if file[-4:] in '.yuv':
             yuv_filesList.append(file)
@@ -98,11 +101,11 @@ def getYuvFileList(filesPath):
 
 if __name__ == '__main__':
     default_description = 'transfrom yuv image to jpg'
-    parser = argparse.ArgumentParser(prog = "yuv2jpg.py", description=default_description)
-    parser.add_argument('-p', '--files_path', type = str, required=False, default='./', help='default ./')
-    parser.add_argument('-t', '--height',     type = int, required=False, default=480,  help='default 480')
-    parser.add_argument('-w', '--width',      type = int, required=False, default=640,  help='default 640')
-    parser.add_argument('-a', '--rotate',     type = int, required=False, default=0,    help='default 0')
+    parser = argparse.ArgumentParser(prog="yuv2jpg.py", description=default_description)
+    parser.add_argument('-p', '--files_path', type=str, required=False, default='./', help='default ./')
+    parser.add_argument('-t', '--height',     type=int, required=False, default=480,  help='default 480')
+    parser.add_argument('-w', '--width',      type=int, required=False, default=640,  help='default 640')
+    parser.add_argument('-a', '--rotate',     type=int, required=False, default=0,    help='default 0')
     args = parser.parse_args()
 
     print()

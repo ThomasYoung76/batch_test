@@ -357,6 +357,15 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
 
 
 def get_eye_result(scores, files, open_thres, valid_thres, error_name="eye_error.xlsx"):
+    """
+    scores文件的分数：左眼open，左眼valid，右眼open，右眼valid，左眼状态，右眼状态（0是闭眼）。后两个仅在use_sequence时输出。
+    :param scores:
+    :param files:
+    :param open_thres:
+    :param valid_thres:
+    :param error_name:
+    :return:
+    """
     df_score = pd.read_csv(scores, sep=' ', engine='c',
                      names=['left_score', 'left_valid', 'right_score', 'right_valid'])
     df_file = pd.read_csv(files, names=['filename'], dtype=np.str)

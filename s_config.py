@@ -6,7 +6,7 @@ gt_rgb = "/mnt/lustre/yangshifu/testset/2d/detect/tongyong/gt_20180615.txt"     
 gt_ir = "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo-detect_ir_test_new_gt.clean.txt"      # dt数据集的gt文件路径
 
 
-types = ('detect', 'liveness', 'verify', 'eyestate')    # 支持测试类型
+types = ('detect', 'liveness', 'verify', 'eyestate', 'landmark')    # 支持测试类型
 images = ('png', 'jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
 
 # 睁眼闭眼标识
@@ -44,5 +44,6 @@ cmd = {
     "liveness": "nohup ./run -l output/files.txt > liveness.log 2>&1 & ",
     "detect": "nohup ./run -d output/files.txt > detect.log 2>&1 & ",
     "verify": "nohup ./run -r output/i_enroll.txt output/i_real.txt > verify.log 2>&1 &",
-    "eyestate": "nohup ./run -e output/files.txt > eyestate.log 2>&1 &"
+    "eyestate": "nohup ./run -e output/files.txt > eyestate.log 2>&1 &",
+    "align": "nohup ./run -m output/files.txt > align.log 2>&1 &"
 }
