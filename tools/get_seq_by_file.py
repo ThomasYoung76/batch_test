@@ -10,17 +10,20 @@ import re
 import shutil
 from pathlib import Path
 from datetime import datetime
+import argparse
 
+desc = """
+    文件时间间隔小于3.1秒的文件当作一个序列，放在一个新的目录下
 """
-    把文件放一个
-"""
 
 
+parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument(dest='data_path', action='store', help='数据集目录或者数据集的绝对路径')
 
-input_dir = r'D:\pywork\bj_liveness'
+args = parser.parse_args()
 
 
-p = Path(input_dir)
+p = Path(args.data_path)
 
 sequence = {}
 for f in p.rglob('*.yuv'):
@@ -37,7 +40,7 @@ for item, value in sequence.items():
     sub_seq = [value[0]]
     for i in range(1, len(gap_value)):
         gap = (gap_value[i] - gap_value[i - 1]).seconds + (gap_value[i] - gap_value[i - 1]).microseconds / 1000000
-        if gap < 3:
+        if gap < 3.1:
             sub_seq.append(value[i])
 
         else:
