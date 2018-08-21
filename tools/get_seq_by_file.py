@@ -63,5 +63,3 @@ for item, value in sequence.items():
         os.mkdir(new_dir)
     for s in sub_seq:
         shutil.move(s, new_dir)
-    # 重置sub_seq
-    sub_seq = [value[i]]

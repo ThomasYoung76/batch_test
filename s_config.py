@@ -28,7 +28,7 @@ liveness_score_thres = 0.95     # 活体阈值
 verify_score_thres = 0.7        # 比对阈值
 eye_open_thres = 9.5           # 睁闭眼是否睁眼阈值
 eye_valid_thres = 9.5          # 睁闭眼是否有效阈值
-fprs=[(0.1 - 0.01*p) for p in np.arange(0, 10)]      # 写roc的fprs
+fprs = [10**(-p) for p in np.arange(1, 7, 1.)]      # 写roc的fprs
 
 # 多帧策略配置参数
 is_use_sequence = False     # 采用多帧策略时，设置为True，"eyestate"将开启时序模式来判断睁闭眼。此时，输入的列表中，每一段序列靠空行分隔开。
