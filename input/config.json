@@ -1,35 +1,60 @@
 {
-    "model":{
-        "align":"models/align/M_Align_occlusion_106_1.6.4.model",
-        "detect":"models/detect/M_Detect_Hunter_SmallFace_Gray_360_4.7.4.model",
-        "verify":"models/verify/M_Verify_MimicG2Pruned_Common_3.67.0.model",
-        "liveness":"models/liveness/",
-        "eyelid":"models/gaze/gaze/M_Align_Deepface_240_Eye_And_Iris_IR_1.3.0.model",
-        "gaze":"models/gaze/gaze/M_Gaze_3d_1.3.0.model",
-        "head3d":"models/gaze/gaze/M_Head_3d_Eyes_1.0.0.model",
-        "eyestate":"models/gaze/M_Align_Deepface_Eye_State_Analysis_IR_1.9.0.model",
-        "gaze_mn":"models/gaze/gazemn_2.8.0.model",
-        "eye_dir":"",
-        "gaze_tracking":""
-    },
-    "input":{
-        "width":640,
-        "height":480,
-        "orient":"right",
-        "gray":false
-    },
-    "intrinsic":[
-        500,
-        0,
-        240,
-        0,
-        500,
-        320,
-        0,
-        0,
-        1
+  "input": {
+    "width": 640,
+    "height": 480,
+    "orient": "right",
+    "gray": false,
+    "use_hist": false,
+    "input_prefix": "",
+    "output_prefix": ""
+  },
+  "detect": {
+    "model": "models/detect/M_Detect_Hunter_SmallFace_IR_AND_RGB_9.2.0.model",
+    "platform": "default",
+    "force_resize_max": 0
+  },
+  "align": {
+    "model": "models/align/M_Align_occlusion_106_1.6.4.model",
+    "platform": "default",
+    "align_thres": 0.1,
+    "save_landmark_img": false,
+    "save_aligned_img": false,
+    "use_track": false
+  },
+  "verify": {
+    "model": "models/verify/M_Verify_Mobilenetv2Pruned_Common_3.75.1.model",
+    "platform": "default",
+    "feature_len": 128,
+    "verify_cropped": false
+  },
+  "liveness": {
+    "model": "models/2d_models/liveness/M_Liveness_Antispoofing_General_7.37.1.model",
+    "platform": "default",
+    "use_sequence": false
+  },
+  "eyestate": {
+    "model": "",
+    "platform": "default",
+    "use_sequence": true,
+    "open_thres": 9500,
+    "valid_thres": 9500,
+    "buffer_sizes": 2
+  },
+  "gaze_mn": {
+    "model": "",
+    "head3d": "",
+    "intrinsic": [
+      480.422444,
+      0,
+      320.977978,
+      0,
+      480.422444,
+      195.290545,
+      0,
+      0,
+      1
     ],
-    "eyestate_thres":0.3,
-    "feature_len":128,
-    "force_resize_max":640
+    "eyestate_thres": 0.8
+  },
+  "benchmark": false
 }

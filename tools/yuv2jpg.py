@@ -71,7 +71,7 @@ def process(args, yuv_list):
         print(image_path)
         try:
             img = cvt_yuv_nv21_to_rgb(args, image_path)
-            saved_image_path = image_path + '.jpg'
+            saved_image_path = image_path.rstrip('.yuv') + '.jpg'
             cv2.imwrite(saved_image_path, img)
             print("[%d/%d] Success: %s" % (count, len(yuv_list), image_path))
             succ += 1
