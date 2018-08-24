@@ -169,7 +169,7 @@ def check_config():
     t_type = d[test_type].get('model')
     for t in [align, detect, t_type]:
         if not Path(os.path.join(PATH_BASE, t)).exists():
-            print("Error. align model: {} not exist".format(align))
+            print("Error. model: {} not exist".format(t))
             sys.exit(0)
 
     # for item in d['model']:

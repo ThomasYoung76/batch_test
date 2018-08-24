@@ -6,40 +6,40 @@
 			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
 			"ext": "ir",
 			"time": "",
-            "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model"
-            },
-            "force_resize_max": 0
+            "detect": {
+                "model": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model",
+				"force_resize_max": 0
+            }
 		}, {
 			"id": 1,
 			"test_type": "detect",
 			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
 			"ext": "ir",
 			"time": "",
-            "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model"
-            },
-            "force_resize_max": 480
+            "detect": {
+                "model": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model",
+				"force_resize_max": 480
+            }
 		}, {
 			"id": 2,
 			"test_type": "detect",
 			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
 			"ext": "ir",
 			"time": "",
-            "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model"
-            },
-            "force_resize_max": 432
+            "detect": {
+                "model": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model",
+				"force_resize_max": 432
+            }
 		}, {
 			"id": 3,
 			"test_type": "detect",
 			"data_path": "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo_detect",
 			"ext": "ir",
 			"time": "",
-            "model": {
-                "detect": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model"
-            },
-            "force_resize_max": 320
+            "detect": {
+                "model": "models/detect/M_Detect_Hunter_SmallFace_360_IR_9.0.1.model",
+				"force_resize_max": 320
+            }
 		}
 	]
 }
