@@ -561,12 +561,14 @@ def get_verify_errors(df, real_photos, positive=0.7, negative=0.7):
         row.index = [real_photos['person'].astype(str), real_photos['filename']]
         # print(row)
         self = row[str(person)]
-        self_nums = self_nums + len(self)
+        self_detect = self[self > -1]           # 去除未检测人脸的图
+        self_nums = self_nums + len(self_detect)       # self_nums去除未检测人脸的图
         self_error = self[(self < positive) & (self > -1)]
         for item in self_error.index:
             self_errors.append((item, self_error[item]))
         others = row.drop(person, level=0)
-        other_nums = other_nums + len(others)
+        others_detect = others[others > -1]          # 去除未检测人脸的图
+        other_nums = other_nums + len(others_detect)       # others_detect去除未检测人脸的图
         other_error = others[others >= negative]
         for item in other_error.index:
             other_errors.append([person, item[1], other_error.loc[item]])
