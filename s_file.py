@@ -179,6 +179,17 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
     list2file(labels, label_name)
 
 
+def build_eyestate_input(data_path, file_type, flag, file_name, label_name, filter_,
+                         is_multi_frame=False, is_line_sep=False):
+
+    files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_,
+                      is_multi_frame=is_multi_frame, is_line_sep=is_line_sep)
+    labels = get_labels_for_pc(files, flag=flag)
+    list2file(files, file_name)
+    list2file(labels, label_name)
+
+
+
 def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
     total = len(df)
     # print(df.head())
