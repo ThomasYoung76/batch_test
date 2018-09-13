@@ -118,7 +118,7 @@ def get_labels_for_pc(files, flag='human_test'):
     """
     获取文件列表对应的labels
     :param files: 文件列表
-    :param flag: 真人标志
+    :param flag: 活体真人标志， 睁闭眼假人标识
     :return:
     """
     labels = []
@@ -127,7 +127,7 @@ def get_labels_for_pc(files, flag='human_test'):
         if not f:
             continue
         if isinstance(flag, str):
-            # 真人为0，假人为1
+            # 真人为0，假人为1, 睁闭眼里睁眼是1，闭眼是0
             if flag.lower() in f.lower():
                 labels.append(0)
             else:
@@ -181,9 +181,6 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
 
 def build_eyestate_input(data_path, file_type, flag, file_name, label_name, filter_,
                          is_multi_frame=False, is_line_sep=False):
-
-    if file_type == 'gray16':
-        file_type = '_\d\.gray16'
 
     files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_,
                       is_multi_frame=is_multi_frame, is_line_sep=is_line_sep)
