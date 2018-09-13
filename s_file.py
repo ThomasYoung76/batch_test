@@ -189,7 +189,6 @@ def build_eyestate_input(data_path, file_type, flag, file_name, label_name, filt
     list2file(labels, label_name)
 
 
-
 def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
     total = len(df)
     # print(df.head())
@@ -365,13 +364,13 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
     # df = df[df['left_score'] > -1 | df['right_score'] > -1]
 
     # 闭眼误认为睁眼
-    close_error = df[df['filename'].str.contains(close_flag) &
+    close_error = df[df['filename'].str.contains(close_flag) & (
                       ((df['left_score'] > open_thres) & (df['left_valid'] > valid_thres)) |
-                      ((df['right_score'] > open_thres) & (df['right_valid'] > valid_thres))]
-    # 真眼误认为闭眼
+                      ((df['right_score'] > open_thres) & (df['right_valid'] > valid_thres)))]
+    # 睁眼误认为闭眼
     open_error = df[df['filename'].str.contains(open_flag) &
                      ((df['left_score'] < open_thres) | (df['left_valid'] < valid_thres)) &
-                     (df['right_score'] < open_thres) | (df['right_valid'] < valid_thres)]
+                    ((df['right_score'] < open_thres) | (df['right_valid'] < valid_thres))]
 
     # 计算frr和far
     far_frr = [[open_thres, len(close_error) / len(df), len(open_error) / len(df), len(df), len(df_undetect),
