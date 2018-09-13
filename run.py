@@ -198,7 +198,7 @@ def prepare_data():
                              label_name=label_name, filter_=section, is_multi_frame=is_use_sequence,
                              is_line_sep=is_line_sep)
     elif test_type == 'eyestate':
-        build_liveness_input(data_path, file_type=file_ext, flag=eye_open, file_name=file_name,
+        build_eyestate_input(data_path, file_type=file_ext, flag=eye_close, file_name=file_name,
                              label_name=label_name, filter_=section, is_multi_frame=is_use_sequence,
                              is_line_sep=is_line_sep)
     elif test_type == 'verify':

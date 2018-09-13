@@ -42,7 +42,7 @@ def concat_list(list1, list2, sep=' '):
     return result
 
 
-def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=False, is_line_sep=False):
+def get_files(src, file_type="jpg", is_abs=True, filter_='', is_multi_frame=False, is_line_sep=False):
     """
     获取文件列表
     :param src: 数据集目录
@@ -54,7 +54,7 @@ def get_files(src, file_type="jpg", is_abs=False, filter_='', is_multi_frame=Fal
     """
     p = Path(src)
     files = []
-    for file_name in p.rglob("*.{}".format(file_type)):
+    for file_name in p.rglob("*{}".format(file_type)):
         if not is_abs:
             file_name = file_name.relative_to(src)
         else:
@@ -181,6 +181,9 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
 
 def build_eyestate_input(data_path, file_type, flag, file_name, label_name, filter_,
                          is_multi_frame=False, is_line_sep=False):
+
+    if file_type == 'gray16':
+        file_type = '_\d\.gray16'
 
     files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_,
                       is_multi_frame=is_multi_frame, is_line_sep=is_line_sep)

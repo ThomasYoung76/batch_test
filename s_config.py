@@ -12,8 +12,8 @@ images = ('png', 'jpg', 'yuv', 'ir', 'gray16')    # 支持图片类型
 is_wait_env_free = True        # 其他测试正在进行时，是否等到环境空闲时执行，默认True，一直等待
 is_wait_finish = True       # 是否等待脚本执行完成
 liveness_flag = 'human_test/'  # 图片真人标识，如有多个目录为真人，则用列表或元祖来设置flag，如北京数据：['Enroll', 'Real']
-eye_open = '睁眼'         # 睁眼
-eye_close = '闭眼'       # 闭眼
+eye_open = '睁眼/'         # 睁眼
+eye_close = '闭眼/'       # 闭眼
 
 # 阈值配置
 liveness_score_thres = 0.95     # 活体阈值
