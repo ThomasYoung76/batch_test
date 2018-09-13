@@ -669,9 +669,10 @@ def analysis_verify_result(all_result, list_id, ana_result_dir):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
-    # parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
-    # parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-d', dest='dataset', action="store", help="数据集路径")
+    parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
+    parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
+    args = parser.parse_args()
     # get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
-    pass
+    get_files(args.dataset, file_type='gray16')
