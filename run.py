@@ -193,8 +193,12 @@ def prepare_data():
     if not Path(output).exists():
         os.makedirs(output)
 
-    if test_type in ['liveness', 'eyestate']:
+    if test_type == 'liveness':
         build_liveness_input(data_path, file_type=file_ext, flag=liveness_flag, file_name=file_name,
+                             label_name=label_name, filter_=section, is_multi_frame=is_use_sequence,
+                             is_line_sep=is_line_sep)
+    elif test_type == 'eyestate':
+        build_liveness_input(data_path, file_type=file_ext, flag=eye_open, file_name=file_name,
                              label_name=label_name, filter_=section, is_multi_frame=is_use_sequence,
                              is_line_sep=is_line_sep)
     elif test_type == 'verify':
@@ -287,7 +291,7 @@ def optimize_result(raw_result, id_=None):
     final_result = "{0}{1}{2}_result.xlsx".format(result_dir, os.sep, version)
     roc = "{0}{1}{2}-roc.txt".format(result_dir, os.sep, version)
     if test_type == 'liveness':
-        shutil.copy2(file_name, result_dir)
+
         if is_use_sequence:
             get_liveness_result_for_multi_frame(scores=raw_result, files=file_name, error_name=final_result,
                                                 flag=liveness_flag, score_thres=liveness_score_thres, version=version)
@@ -299,6 +303,7 @@ def optimize_result(raw_result, id_=None):
         s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
 
     if test_type == 'eyestate':
+        shutil.copy2(file_name, result_dir)
         if is_use_sequence:
             get_eye_result_for_multi_frame(scores=raw_result, files=file_name, open_flag=eye_open, close_flag=eye_close,
                                        error_name=final_result, open_thres=eye_open_thres, valid_thres=eye_valid_thres,

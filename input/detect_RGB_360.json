@@ -3,7 +3,7 @@
 	[{
 			"id": 0,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -13,7 +13,7 @@
 		},{
 			"id": 1,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -23,7 +23,7 @@
 		},{
 			"id": 2,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -33,7 +33,7 @@
 		},{
 			"id": 3,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -43,7 +43,7 @@
 		},{
 			"id": 5,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -53,7 +53,7 @@
 		},{
 			"id": 6,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -63,7 +63,7 @@
 		},{
 			"id": 7,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -73,7 +73,7 @@
 		},{
 			"id": 8,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -83,7 +83,7 @@
 		},{
 			"id": 9,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -93,7 +93,7 @@
 		},{
 			"id": 10,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -103,7 +103,7 @@
 		},{
 			"id": 11,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
@@ -113,11 +113,51 @@
 		},{
 			"id": 12,
 			"test_type": "detect",
-			"data_path": "/mnt/lustre/yangshifu/testset/2d/detect/tongyong",
+			"data_path": "/home/andrew/code/data/detect_360/test",
 			"ext": "jpg",
 			"time": "",
             "detect": {
 				"model": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.1.0.model",
+				"force_resize_max": 320
+			}
+		},{
+			"id": 13,
+			"test_type": "detect",
+			"data_path": "/home/andrew/code/data/detect_360/test",
+			"ext": "jpg",
+			"time": "",
+            "detect": {
+				"model": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.1.1.model",
+				"force_resize_max": 0
+			}
+		},{
+			"id": 14,
+			"test_type": "detect",
+			"data_path": "/home/andrew/code/data/detect_360/test",
+			"ext": "jpg",
+			"time": "",
+            "detect": {
+				"model": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.1.1.model",
+				"force_resize_max": 480
+			}
+		},{
+			"id": 15,
+			"test_type": "detect",
+			"data_path": "/home/andrew/code/data/detect_360/test",
+			"ext": "jpg",
+			"time": "",
+            "detect": {
+				"model": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.1.1.model",
+				"force_resize_max": 432
+			}
+		},{
+			"id": 16,
+			"test_type": "detect",
+			"data_path": "/home/andrew/code/data/detect_360/test",
+			"ext": "jpg",
+			"time": "",
+            "detect": {
+				"model": "models/detect/M_Detect_Hunter_SmallFace_360_RGB_9.1.1.model",
 				"force_resize_max": 320
 			}
 		}

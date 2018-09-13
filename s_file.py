@@ -166,7 +166,10 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
         file_1 = get_files(data_path, file_type=file_type[1], is_abs=True, filter_=filter_)
         file_0.sort(key=lambda x: Path(x).name)
         file_1.sort(key=lambda x: Path(x).name)
-        files = concat_list(file_0, file_1, sep=' ')
+        if file_1:
+            files = concat_list(file_0, file_1, sep=' ')
+        else:
+            files = file_0
         labels = get_labels_for_pc(file_0, flag=flag)
     else:
         files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_,
@@ -180,41 +183,20 @@ def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
     total = len(df)
     # print(df.head())
     unknow = len(df[df[colomn1] == -1])
-    df = df[df[colomn1] != -1]
+    # df = df[df[colomn1] != -1]
     real_number = len(df[df[colomn2] == 0])
     photo_number = len(df[df[colomn2] == 1])
-    num_2d = len(df.loc[df[column_filename].str.contains('/2D_photo/')])
-    num_3d = len(df.loc[df[column_filename].str.contains('/3D_photo/')])
-    num_3d_high = len(df.loc[df[column_filename].str.contains('/3D_Highcost/')])
-    num_3d_low = len(df.loc[df[column_filename].str.contains('/3D_Lowcost/')])
 
     # 真人识别为假人
-    frr_number = len(df.loc[((df[colomn1] > score) & (df[colomn2] == 0) & (df[colomn1] <= 1))])
+    frr_number = len(df.loc[((df[colomn1] > score) & (df[colomn2] == 0) & (df[colomn1] <= 1) & df[colomn1] == -1)])
     # 假人识别为真人
     far_number = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1))])
-    # 2d假人识别为真人
 
-    far_number_2d = far_number_3d = 0
-    far_number_2d = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                df[column_filename].str.contains('/2D_photo/', regex=False))])
-    ## 3d假人识别为真人
-    far_number_3d = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                df[column_filename].str.contains('/3D_photo/', regex=False))])
-    far_number_3d_high = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                     df[column_filename].str.contains('/3D_Highcost/', regex=False))])
-    far_number_3d_low = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1) &
-                                    df[column_filename].str.contains('/3D_Lowcost/', regex=False))])
     frr = 0 if not real_number else frr_number / float(real_number)
-    far2d = 0 if not num_2d else far_number_2d / float(num_2d)
-    far3d = 0 if not num_3d else far_number_3d / float(num_3d)
-    far3d_high = 0 if not num_3d_high else far_number_3d_high / float(num_3d_high)
-    far3d_low = 0 if not num_3d_low else far_number_3d_low / float(num_3d_low)
+
     far = 0 if not photo_number else far_number / float(photo_number)
     return (far, frr, total, real_number, frr_number, photo_number, far_number,
-            unknow, unknow / float(total),
-            num_2d, far_number_2d, far2d, num_3d, far_number_3d, far3d,
-            num_3d_high, far_number_3d_high, far3d_high,
-            num_3d_low, far_number_3d_low, far3d_low)
+            unknow, unknow / float(total))
 
 
 def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, version=''):
@@ -241,8 +223,8 @@ def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, ver
         result = get_live_frr_far(group, 'score', score_thres, 'label')
         results.append([name, *result[:9]])
 
-    # 真人识别为假人
-    df1 = df.loc[((df['score'] > score_thres) & (df['label'] == 0))]
+    # 真人识别为假人，包括真人中为检测到人脸的照片
+    df1 = df.loc[(df['score'] > score_thres) & (df['label'] == 0) & df['score'] == -1]
     # 假人识别为真人
     df2 = df.loc[((df['score'] > 0) & (df['score'] < score_thres) & (df['label'] == 1))]
     # 分数小于0的图片
@@ -267,11 +249,7 @@ def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, ver
         results.append([value, *result])
 
     columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total",
-               "real_num", "frr_num", "photo_num", "far_num", "unknow", "unknow_rate",
-               'num_2d', 'far_number_2d', 'far2d',
-               'num_3d', 'far_number_3d', 'far3d',
-               'num_3d_high', 'far_number_3d_high', 'far3d_high',
-               'num_3d_low', 'far_number_3d_low', 'far3d_low']
+               "real_num", "frr_num", "photo_num", "far_num", "unknow", "unknow_rate",]
 
     df4 = pd.DataFrame(results, columns=columns)
     df4.to_excel(writer, sheet_name='FAR_FRR', index=False)
@@ -366,23 +344,26 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
     :param error_name:
     :return:
     """
-    df_score = pd.read_csv(scores, sep=' ', engine='c',
-                     names=['left_score', 'left_valid', 'right_score', 'right_valid'])
+    df_score = pd.read_csv(scores, delimiter='\s+', engine='c',
+                     names=['left_score', 'left_valid', 'right_score', 'right_valid'], header=None)
     df_file = pd.read_csv(files, names=['filename'], dtype=np.str)
     df = pd.concat([df_file, df_score], axis=1)
+
     df_undetect = df[df['left_score'] == -1]
 
-    df2 = df[df['left_score'] > -1]
+    # df = df[df['left_score'] > -1 | df['right_score'] > -1]
 
-    close_error = df2[df2['filename'].str.contains(close_flag) &
-                      ((df2['left_score'] > open_thres) & (df2['left_valid'] > valid_thres)) |
-                      ((df2['right_score'] > open_thres) & (df2['right_valid'] > valid_thres))]
-    open_error = df2[df2['filename'].str.contains(open_flag) &
-                     ((df2['left_score'] < open_thres) | (df2['left_valid'] < valid_thres)) &
-                     (df2['right_score'] < open_thres) | (df2['right_valid'] < valid_thres)]
+    # 闭眼误认为睁眼
+    close_error = df[df['filename'].str.contains(close_flag) &
+                      ((df['left_score'] > open_thres) & (df['left_valid'] > valid_thres)) |
+                      ((df['right_score'] > open_thres) & (df['right_valid'] > valid_thres))]
+    # 真眼误认为闭眼
+    open_error = df[df['filename'].str.contains(open_flag) &
+                     ((df['left_score'] < open_thres) | (df['left_valid'] < valid_thres)) &
+                     (df['right_score'] < open_thres) | (df['right_valid'] < valid_thres)]
 
     # 计算frr和far
-    far_frr = [[open_thres, len(close_error) / len(df2), len(open_error) / len(df2), len(df), df_undetect,
+    far_frr = [[open_thres, len(close_error) / len(df), len(open_error) / len(df), len(df), len(df_undetect),
                 len(close_error), len(open_error)]]
 
     columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total", "undetect",
@@ -679,7 +660,4 @@ if __name__ == "__main__":
     # parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
     # args = parser.parse_args()
     # get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
-    from s_config import eye_open, eye_close
-    get_eye_result_for_multi_frame('score_1.4.4_ppl.csv', files='files144.txt', open_flag=eye_open,
-                                   close_flag=eye_close, error_name='2.7.1.xlsx', open_thres=9.5, valid_thres=9.5,
-                                   version='2.7.1')
+    pass

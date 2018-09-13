@@ -35,7 +35,11 @@ def raw_eval_func(gt_file_path, det_file_path, target_cls=1, iou=0.2, rotate=0):
     for i in range(dt_num):
         dt_idx = argsort_idx[i]
         img_path, ref_dt_box = dts[dt_idx]
-        img_hw, gt_range, ref_gt_boxes, ig_range, ref_ig_boxes = gts[img_path]
+        try:
+            img_hw, gt_range, ref_gt_boxes, ig_range, ref_ig_boxes = gts[img_path]
+        except KeyError as e:
+            print(e)
+            continue
 
         if ref_gt_boxes.shape[0] > 0:
             # if have gt
