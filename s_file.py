@@ -363,6 +363,10 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
 
     # df = df[df['left_score'] > -1 | df['right_score'] > -1]
 
+    total_close = df[df['filename'].str.contains(close_flag)]
+
+    total_open = df[df['filename'].str.contains(open_flag)]
+
     # 闭眼误认为睁眼
     close_error = df[df['filename'].str.contains(close_flag) & (
                       ((df['left_score'] > open_thres) & (df['left_valid'] > valid_thres)) |
@@ -373,10 +377,10 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
                     ((df['right_score'] < open_thres) | (df['right_valid'] < valid_thres))]
 
     # 计算frr和far
-    far_frr = [[open_thres, len(close_error) / len(df), len(open_error) / len(df), len(df), len(df_undetect),
-                len(close_error), len(open_error)]]
+    far_frr = [[open_thres, len(close_error) / len(total_close), len(open_error) / len(total_open), len(df),
+                len(total_open), len(total_close), len(df_undetect), len(close_error), len(open_error)]]
 
-    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total", "undetect",
+    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total", "total_open", "total_close", "undetect",
                "far_num", "frr_num"]
 
     df_far_frr = pd.DataFrame(far_frr, columns=columns)
