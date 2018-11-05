@@ -120,7 +120,7 @@ def get_labels_for_pc(files, flag='human_test'):
     """
     获取文件列表对应的labels
     :param files: 文件列表
-    :param flag: 真人标志
+    :param flag: 活体真人标志， 睁闭眼假人标识
     :return:
     """
     labels = []
@@ -129,7 +129,7 @@ def get_labels_for_pc(files, flag='human_test'):
         if not f:
             continue
         if isinstance(flag, str):
-            # 真人为0，假人为1
+            # 真人为0，假人为1, 睁闭眼里睁眼是1，闭眼是0
             if flag.lower() in f.lower():
                 labels.append(0)
             else:
@@ -184,15 +184,11 @@ def build_liveness_input(data_path, file_type, flag, file_name, label_name, filt
 def build_eyestate_input(data_path, file_type, flag, file_name, label_name, filter_,
                          is_multi_frame=False, is_line_sep=False):
 
-    if file_type == 'gray16':
-        file_type = '_\d\.gray16'
-
     files = get_files(data_path, file_type=file_type, is_abs=True, filter_=filter_,
                       is_multi_frame=is_multi_frame, is_line_sep=is_line_sep)
     labels = get_labels_for_pc(files, flag=flag)
     list2file(files, file_name)
     list2file(labels, label_name)
-
 
 
 def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
@@ -369,20 +365,24 @@ def get_eye_result(scores, files, open_thres, valid_thres, open_flag='/open', cl
 
     # df = df[df['left_score'] > -1 | df['right_score'] > -1]
 
+    total_close = df[df['filename'].str.contains(close_flag)]
+
+    total_open = df[df['filename'].str.contains(open_flag)]
+
     # 闭眼误认为睁眼
-    close_error = df[df['filename'].str.contains(close_flag) &
+    close_error = df[df['filename'].str.contains(close_flag) & (
                       ((df['left_score'] > open_thres) & (df['left_valid'] > valid_thres)) |
-                      ((df['right_score'] > open_thres) & (df['right_valid'] > valid_thres))]
-    # 真眼误认为闭眼
+                      ((df['right_score'] > open_thres) & (df['right_valid'] > valid_thres)))]
+    # 睁眼误认为闭眼
     open_error = df[df['filename'].str.contains(open_flag) &
                      ((df['left_score'] < open_thres) | (df['left_valid'] < valid_thres)) &
-                     (df['right_score'] < open_thres) | (df['right_valid'] < valid_thres)]
+                    ((df['right_score'] < open_thres) | (df['right_valid'] < valid_thres))]
 
     # 计算frr和far
-    far_frr = [[open_thres, len(close_error) / len(df), len(open_error) / len(df), len(df), len(df_undetect),
-                len(close_error), len(open_error)]]
+    far_frr = [[open_thres, len(close_error) / len(total_close), len(open_error) / len(total_open), len(df),
+                len(total_open), len(total_close), len(df_undetect), len(close_error), len(open_error)]]
 
-    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total", "undetect",
+    columns = ["Threshold", "FAR-{}".format(version), "FRR-{}".format(version), "total", "total_open", "total_close", "undetect",
                "far_num", "frr_num"]
 
     df_far_frr = pd.DataFrame(far_frr, columns=columns)
