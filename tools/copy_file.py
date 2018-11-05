@@ -66,6 +66,7 @@ def bak_file(src, dst, src_suf, dst_suf, is_upward=False, is_suf=False):
                     os.makedirs(new_dir)
                 shutil.copy(file_path, os.path.join(new_dir, new_name))
 
+
 if not os.path.isdir(options.src_dir):
     print("Error. source diretory({}) is not exist".format(options.src_dir))
     sys.exit(1)

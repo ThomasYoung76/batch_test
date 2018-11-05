@@ -55,6 +55,8 @@ def get_files(src, file_type="jpg", is_abs=True, filter_='', is_multi_frame=Fals
     p = Path(src)
     files = []
     for file_name in p.rglob("*{}".format(file_type)):
+        if '/Enroll/' in str(file_name):
+            continue
         if not is_abs:
             file_name = file_name.relative_to(src)
         else:
@@ -238,7 +240,7 @@ def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, ver
         results.append([name, *result[:9]])
 
     # 真人识别为假人，包括真人中为检测到人脸的照片
-    df1 = df.loc[(df['score'] > score_thres) & (df['label'] == 0) & df['score'] == -1]
+    df1 = df.loc[((df['score'] > score_thres) | (df['score'] == -1)) & (df['label'] == 0)]
     # 假人识别为真人
     df2 = df.loc[((df['score'] > 0) & (df['score'] < score_thres) & (df['label'] == 1))]
     # 分数小于0的图片
@@ -515,6 +517,8 @@ def build_verify_input(data_path, file_type, i_enroll, i_real, label_name):
                         if '/enroll/' in str(img).lower():
                             roll.write(os.path.join(root, str(img)))
                             roll.write(os.linesep)
+                        elif '/hack/' in str(img).lower():
+                            continue
                         else:
                             real.write(os.path.join(root, str(img)))
                             real.write(os.linesep)
@@ -669,10 +673,25 @@ def analysis_verify_result(all_result, list_id, ana_result_dir):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-d', dest='dataset', action="store", help="数据集路径")
-    parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
-    parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
-    args = parser.parse_args()
-    # get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
-    get_files(args.dataset, file_type='gray16')
+    # parser = argparse.ArgumentParser(description="test", formatter_class=argparse.RawTextHelpFormatter)
+    # parser.add_argument('-d', dest='dataset', action="store", help="数据集路径")
+    # parser.add_argument('-s', dest='score', action="store", default='score_2.6.42.5-snpe.csv', help="score分数文件")
+    # parser.add_argument('-f', dest='file', action='store', default='files.txt', help='数据集的文件列表')
+    # args = parser.parse_args()
+    # # get_liveness_result_for_multi_frame(args.score, args.file, error_name='result_2.6.42.5.xlsx')
+    # get_files(args.dataset, file_type='gray16')
+    # 活体
+    raw_result = "liveness_files_liveness_7.47.1.txt.csv"
+    file_name = "files_liveness.txt"
+    label_name = "liveness_label.txt"
+    final_result = "v2.6.50.xlsx"
+    version = ""
+    get_liveness_result(raw_result, file_name, label_name, score_thres=0.95,
+                        error_name=final_result, version=version)
+
+    # 写roc
+    import s_roc
+
+    roc = "liveness_roc.txt"
+    fprs = [10 ** (-p) for p in np.arange(1, 7, 1.)]
+    s_roc.cal_roc(raw_result, label_name, roc_name=roc, fprs=fprs)
