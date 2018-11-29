@@ -200,9 +200,9 @@ def get_live_frr_far(df, colomn1, score, colomn2, column_filename='filename'):
     photo_number = len(df[df[colomn2] == 1])
 
     # 真人识别为假人
-    frr_number = len(df.loc[((df[colomn1] > score) & (df[colomn2] == 0) & (df[colomn1] <= 1) & df[colomn1] == -1)])
+    frr_number = len(df.loc[((df[colomn1] > score) | (df[colomn1] == -1)) & (df[colomn2] == 0) & (df[colomn1] <= 1)])
     # 假人识别为真人
-    far_number = len(df.loc[((df[colomn1] < score) & (df[colomn2] == 1))])
+    far_number = len(df.loc[(df[colomn1] < score) & (df[colomn1] > 0) & (df[colomn2] == 1)])
 
     frr = 0 if not real_number else frr_number / float(real_number)
 
@@ -255,7 +255,7 @@ def get_liveness_result(scores, files, labels, error_name, score_thres=0.95, ver
     df3.to_excel(writer, sheet_name='分类统计', index=False)
 
     results = []
-    values = [0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999]
+    values = [0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999]
     for value in values:
         result = get_live_frr_far(df, 'score', value, 'label')
         results.append([value, *result])
@@ -329,7 +329,7 @@ def get_liveness_result_for_multi_frame(scores, files, error_name='', flag='huma
     df3.to_excel(writer, sheet_name='分类统计', index=False)
 
     results = []
-    values = [0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999]
+    values = [0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999]
     for value in values:
         result = get_live_frr_far(df, 'score', value, 'label', column_filename='path')
         results.append([value, *result])
