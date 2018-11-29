@@ -1,17 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 """
-Author: 
-    jinxiao <jinxiao@sensetime.com>
-
-Modified:
-    liqiming <liqiming@sensetime.com>
-    yangshifu <yangshifu@sensetime.com>
-Usage:
-    python <scripts-name> --help
-
+Created on 2018/11/29
 Function:
-    transfer yuv image to jpg
+    transfer nv12 image to jpg
+@author: yangshifu
+@mail: yangshifu@sensetime.com
+
 """
 
 import numpy as np
@@ -19,7 +13,7 @@ import cv2, os, sys
 import argparse
 import imutils
 
-def cvt_yuv_nv21_to_rgb(args, yuv_file):
+def cvt_yuv_nv12_to_rgb(args, yuv_file):
     # yuv_file = 't.yuv'
     # print 'yuv_file = ',yuv_file
     stream = open(yuv_file, 'rb')
@@ -38,8 +32,8 @@ def cvt_yuv_nv21_to_rgb(args, yuv_file):
             reshape((fheight//2, fwidth//2,2)).\
             repeat(2, axis=0).repeat(2, axis=1)
 
-    U = UV[:,:,0] 
-    V = UV[:,:,1]
+    V = UV[:,:,0]
+    U = UV[:,:,1]
 
     # Stack the YUV channels together, crop the actual resolution, convert to
     # floating point for later calculations, and apply the standard biases
@@ -68,12 +62,12 @@ def process(args, yuv_list):
         count += 1
         # image_path = args.files_path + file.strip()
         image_path = os.path.dirname(file) + os.sep + os.path.basename(file).strip()
-        print(image_path)
+        # print(image_path)
         try:
-            img = cvt_yuv_nv21_to_rgb(args, image_path)
+            img = cvt_yuv_nv12_to_rgb(args, image_path)
             saved_image_path = image_path.rstrip('.yuv') + '.jpg'
             cv2.imwrite(saved_image_path, img)
-            print("[%d/%d] Success: %s" % (count, len(yuv_list), image_path))
+            print("[%d/%d] Success: %s" % (count, len(yuv_list), image_path), end='\r')
             succ += 1
         except:
             print("[%d/%d] Fail: %s" % (count, len(yuv_list), image_path))
@@ -84,7 +78,7 @@ def process(args, yuv_list):
     print("Fail %d times" % fail)
 
 
-def getYuvFileList(filesPath):
+def getYuvFileList(filesPath, file_type='yuv'):
     all_filesList = []
     yuv_filesList = []
     for (dirpath, dirnames, filenames) in os.walk(filesPath):
@@ -93,7 +87,7 @@ def getYuvFileList(filesPath):
             all_filesList.append(file_path)
         # all_filesList.extend(filenames)
     for file in all_filesList:
-        if file[-4:] in '.yuv':
+        if file.endswith(file_type):
             yuv_filesList.append(file)
         
     return yuv_filesList
@@ -101,7 +95,7 @@ def getYuvFileList(filesPath):
 
 if __name__ == '__main__':
     default_description = 'transfrom yuv image to jpg'
-    parser = argparse.ArgumentParser(prog="yuv2jpg.py", description=default_description)
+    parser = argparse.ArgumentParser(prog="nv12_to_jpg.py", description=default_description)
     parser.add_argument('-p', '--files_path', type=str, required=False, default='./', help='default ./')
     parser.add_argument('-t', '--height',     type=int, required=False, default=480,  help='default 480')
     parser.add_argument('-w', '--width',      type=int, required=False, default=640,  help='default 640')
@@ -111,7 +105,8 @@ if __name__ == '__main__':
     print()
     print('----------START----------')
     print()
-    yuv_filesList = getYuvFileList(args.files_path)
+    yuv_filesList = getYuvFileList(args.files_path, 'nv12')
+
     if len(yuv_filesList) is not 0:
         process(args, yuv_filesList)
     else:
@@ -119,4 +114,4 @@ if __name__ == '__main__':
 
     print()
     print('----------END----------')
-    
+
