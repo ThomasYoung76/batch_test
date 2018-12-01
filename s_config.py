@@ -3,6 +3,7 @@ import numpy as np
 # 路径
 PATH_BASE = '/mnt/lustre/yangshifu/release/linux-x86_64server'   # 梁鼎的批处理工具路径
 # PATH_BASE = '/opt/test_tools/release/linux-x86_64'
+# PATH_BASE = '/home/yangshifu/release/linux-x86_64server'
 gt_rgb = "/mnt/lustre/yangshifu/testset/2d/detect/tongyong/gt_20180615.txt"     # rgb数据集的gt文件路径
 gt_ir = "/mnt/lustre/yangshifu/testset/3d/base_test_data/vivo-detect_ir_test_new_gt.clean.txt"      # dt数据集的gt文件路径
 

@@ -554,7 +554,7 @@ def get_verify_errors(df, real_photos, positive=0.7, negative=0.7):
     self_nums = 0
     other_nums = 0
     for person in df.index:
-        print("index: {}   {}".format(person, time.ctime()))
+        print("index: {}   {}".format(person, time.ctime()), end='\r')
         row = df.loc[str(person)]
         # print(row)
         row.index = [real_photos['person'].astype(str), real_photos['filename']]
