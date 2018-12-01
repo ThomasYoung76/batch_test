@@ -34,7 +34,11 @@ def resize_jpg(filename, height=height, width=width):
 
 def copy_files_by_type(src, filetype="jpg"):
     for file_name in Path(src).rglob('*.{0}'.format(filetype)):
-        aim_file = resize_jpg(str(file_name))
+        try:
+            aim_file = resize_jpg(str(file_name))
+        except:
+            print("Error occured in ", str(file_name))
+            continue
         if src.endswith(os.sep):
             src = src.rstrip(os.sep)
         jpg_filename = str(file_name).replace(src, src + '_240_jpg')
