@@ -67,7 +67,7 @@ def copy_files_by_type(src, filetype="jpg"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="raw图转jpg", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-i', '--input_dir', default=input_dir, action="store", help=u'输入目录')
-    parser.add_argument('-m', '--is_not_move', default=True, action="store_false", help="是否将转换好的jpg移到新的输出目录下，默认移走")
+    parser.add_argument('-m', '--is_move', default=False, action="store_true", help="是否将转换好的jpg移到新的输出目录下，默认不移")
     parser.add_argument('-d', '--is_convert_depth', default=False, action="store_true", help="是否转换depth图, 默认不转")
     options = parser.parse_args()
     input_dir = options.input_dir
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     print("\nSuccess convert ir to jpg. ")
     print("---------------------------")
-    if options.is_not_move:
+    if options.is_move:
         print("Start to move jpg. waiting ...")
         copy_files_by_type(input_dir)
         print("Success move jpg file to {}".format(output_dir))
